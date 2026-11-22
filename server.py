@@ -295,9 +295,19 @@ class ScanIn(BaseModel):
     permission: bool = False      # the person confirmed they're allowed to test that equipment
 
 
+_PROXY_HEADERS = ("cf-connecting-ip", "cf-ray", "x-forwarded-for", "x-forwarded-host", "x-real-ip", "forwarded")
+
+
 def _from_this_computer(request: Request) -> bool:
+    """True only for someone sitting at this PC. Visitors coming through a share link (tunnel)
+    also arrive from 127.0.0.1, so a forwarding header or a non-local Host name means 'outside'."""
     host = (request.client.host if request.client else "") or ""
-    return host in ("127.0.0.1", "::1", "localhost") or host.startswith("::ffff:127.")
+    if not (host in ("127.0.0.1", "::1", "localhost") or host.startswith("::ffff:127.")):
+        return False
+    if any(h in request.headers for h in _PROXY_HEADERS):
+        return False
+    name = request.headers.get("host", "").rsplit(":", 1)[0].strip("[]").lower()
+    return name in ("localhost", "127.0.0.1", "::1", "")
 
 
 def _scan_job(job_id: str, url: str, allow_private: bool, equipment: bool = False):
@@ -327,7 +337,12 @@ def start_scan(body: ScanIn, request: Request):
     # Private addresses are blocked, except this server's own demo shop (or when you allow it for local testing).
     target = urlparse(url if "://" in url else "http://" + url)
     same = lambda a, b: a.replace("127.0.0.1", "localhost") == b.replace("127.0.0.1", "localhost")
-    own_demo = same(target.netloc, request.url.netloc) and target.path.startswith("/demo")
+    local = f"127.0.0.1:{(request.scope.get('server') or ('', 8000))[1]}"
+    own_demo = target.path.startswith("/demo") and (same(target.netloc, request.url.netloc) or same(target.netloc, local))
+    if own_demo:
+        # Scan this server's own demo sites over the loopback address. Behind GitHub Codespaces or a
+        # share link the public address can sit behind a sign-in page that the hidden browser can't pass.
+        url = f"http://{local}{target.path}" + (f"?{target.query}" if target.query else "")
     allow_private = own_demo or os.environ.get("DEBUGPILOT_SCAN_ALLOW_PRIVATE") == "1"
     if body.equipment:
         if not body.permission:

@@ -37,3 +37,15 @@ def test_equipment_scan_needs_permission_and_this_computer():
     # The test client isn't "this computer", like a copy hosted online: local devices stay off limits.
     r = c.post("/api/scan", json={"url": "192.168.1.50", "equipment": True, "permission": True})
     assert r.status_code == 400 and "your own computer" in r.json()["detail"]
+
+
+def test_share_link_visitors_cannot_scan_equipment():
+    """Through a share link (tunnel) visitors arrive from 127.0.0.1 too; they must still count as outside."""
+    from fastapi.testclient import TestClient
+    import server
+    c = TestClient(server.app, base_url="http://127.0.0.1:8000", client=("127.0.0.1", 5555))
+    body = {"url": "http://192.168.1.20/", "equipment": True, "permission": True}
+    r = c.post("/api/scan", json=body, headers={"cf-connecting-ip": "203.0.113.9"})
+    assert r.status_code == 400 and "own computer" in r.json()["detail"]
+    r = c.post("/api/scan", json=body, headers={"host": "abc.trycloudflare.com"})
+    assert r.status_code == 400 and "own computer" in r.json()["detail"]

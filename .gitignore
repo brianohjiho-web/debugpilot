@@ -6,3 +6,4 @@ data/
 *.db
 start-log.txt
 w64devkit*/
+cloudflared.exe
