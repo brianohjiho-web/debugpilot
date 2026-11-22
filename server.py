@@ -59,6 +59,23 @@ async def no_stale_pages(request, call_next):
     return resp
 
 
+PUBLIC = os.environ.get("DEBUGPILOT_PUBLIC") == "1"
+# On a public website only "Scan a site" is open. Pasted code has no sandbox there, and the
+# watcher / pull-request parts share one database, so those are switched off.
+_PUBLIC_BLOCKED = ("/api/debug", "/api/pr", "/api/ingest", "/api/projects", "/api/issues", "/api/demo/reset")
+
+
+@app.middleware("http")
+async def public_mode(request, call_next):
+    if PUBLIC:
+        p = request.url.path
+        if p == "/":
+            return RedirectResponse("/scan")
+        if p.startswith(_PUBLIC_BLOCKED):
+            return JSONResponse({"detail": "This is switched off on the public website."}, status_code=403)
+    return await call_next(request)
+
+
 class DebugRequest(BaseModel):
     language: str
     source: str = Field(max_length=100_000)
@@ -120,7 +137,7 @@ import time as _time
 from collections import defaultdict, deque
 
 from fastapi import Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from agent import autofix, store
@@ -324,11 +341,49 @@ def _scan_job(job_id: str, url: str, allow_private: bool, equipment: bool = Fals
                                            equipment=equipment))
             job["report"] = rep
             job["status"] = "done"
+            _save_job(job)
         except scanner.ScanBlocked as e:
             job["status"], job["error"] = "error", str(e)
         except Exception as e:  # browser crashed, timeout, etc.
             job["status"], job["error"] = "error", f"The scan stopped: {str(e).splitlines()[0][:200]}"
         job["progress"] = ""
+
+
+def _save_job(job: dict):
+    """Keep finished reports on disk so a report link still works after a restart."""
+    try:
+        d = SCAN_DIR / job["id"]
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "job.json").write_text(_json.dumps(job), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _load_job(job_id: str):
+    if not re.fullmatch(r"[0-9a-f]{12}", job_id):
+        return None
+    try:
+        return _json.loads((SCAN_DIR / job_id / "job.json").read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+_scan_hits: dict[str, deque] = defaultdict(deque)
+SCANS_PER_HOUR = int(os.environ.get("DEBUGPILOT_SCANS_PER_HOUR", "10"))
+
+
+def _limit_scans(request: Request):
+    """Public site only: each visitor gets a few scans per hour."""
+    if not PUBLIC:
+        return
+    fwd = request.headers.get("x-forwarded-for", "")
+    who = fwd.split(",")[0].strip() or (request.client.host if request.client else "?")
+    q, now = _scan_hits[who], _time.time()
+    while q and now - q[0] > 3600:
+        q.popleft()
+    if len(q) >= SCANS_PER_HOUR:
+        raise HTTPException(429, f"You've reached {SCANS_PER_HOUR} scans this hour. Please try again later.")
+    q.append(now)
 
 
 @app.post("/api/scan")
@@ -359,6 +414,7 @@ def start_scan(body: ScanIn, request: Request):
     busy = sum(1 for j in SCANS.values() if j["status"] in ("queued", "running"))
     if busy >= 6:
         raise HTTPException(429, "Too many scans running. Try again in a minute.")
+    _limit_scans(request)
     job_id = uuid.uuid4().hex[:12]
     SCANS[job_id] = {"id": job_id, "url": url, "status": "queued", "progress": "Waiting to start", "started": time.time()}
     SCANS[job_id]["equipment"] = body.equipment
@@ -368,7 +424,7 @@ def start_scan(body: ScanIn, request: Request):
 
 @app.get("/api/scan/{job_id}")
 def scan_status(job_id: str):
-    job = SCANS.get(job_id)
+    job = SCANS.get(job_id) or _load_job(job_id)
     if not job:
         raise HTTPException(404, "No such scan")
     return job
@@ -376,7 +432,7 @@ def scan_status(job_id: str):
 
 @app.get("/api/scan/{job_id}/video/{name}")
 def scan_video(job_id: str, name: str):
-    if job_id not in SCANS or not re.fullmatch(r"bug\d+-(before|after)\.webm", name):
+    if not re.fullmatch(r"[0-9a-f]{12}", job_id) or not re.fullmatch(r"bug\d+-(before|after)\.webm", name):
         raise HTTPException(404, "No such video")
     f = SCAN_DIR / job_id / name
     if not f.exists():
