@@ -188,26 +188,6 @@ The code being fixed is not trusted. The runner has:
 - a non-root user
 - a time limit, a CPU limit, and a throwaway folder for each run
 
-### Run with Docker (recommended)
-
-```bash
-cp .env.example .env        # then paste your ANTHROPIC_API_KEY into .env
-docker compose up --build
-```
-
-Open http://localhost:8000, pick a language, press **Load example**, then **Find and fix the bug**.
-
-### Run without Docker (quick try)
-Code runs on your own computer, so only paste code you trust.
-
-```bash
-pip install -r requirements.txt
-export ANTHROPIC_API_KEY=...
-uvicorn server:app --port 8000
-```
-
-Only languages installed on your computer will work.
-
 ### No API key?
 The built-in example for each language still works in demo mode. The answer is prepared, but the sandbox still runs and checks it.
 
