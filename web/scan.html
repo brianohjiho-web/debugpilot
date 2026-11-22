@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DebugPilot · Scan a website</title>
+<link rel="stylesheet" href="/theme.css">
+<style>
+.home{position:relative;min-height:calc(100vh - 98px);padding:70px 20px 40px;text-align:center;background:radial-gradient(55% 60% at 50% 0%,rgba(122,98,201,.30),transparent 70%)}
+.mascot{display:block;margin:-28px auto 6px;width:132px;height:auto}
+.mark{font-size:68px;font-weight:800;letter-spacing:-2.5px;line-height:1.05;margin:0}
+.mark span{background:var(--dusk);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{color:var(--sub);font-size:16px;margin:12px 0 36px}
+form{display:flex;justify-content:center;gap:10px}
+.search{width:700px;max-width:100%;height:62px;display:flex;background:var(--panel);border:1px solid var(--line);border-radius:31px;text-align:left}
+.search .cell{display:flex;flex-direction:column;justify-content:center;padding:0 26px;font-size:14px;color:var(--sub)}
+.search .cell b{font-size:12px;color:var(--text)}
+.search .grow{flex:1;border-left:1px solid var(--line);padding-left:18px;cursor:text}
+.search input{border:0;background:none;color:var(--text);font-size:15px;outline:none;padding:0}
+.search input::placeholder{color:var(--dim)}
+.go{width:62px;height:62px;border-radius:50%;border:0;background:var(--grad);display:grid;place-items:center;box-shadow:0 12px 26px -12px rgba(217,133,183,.8)}
+.promo{position:absolute;left:20px;top:28px;width:220px;text-align:left;padding:16px}
+.promo h3{margin:8px 0 4px;font-size:15px} .promo p{margin:0;color:var(--sub);font-size:12px;line-height:1.5}
+.promo svg{display:block;margin:12px auto}
+@media (max-width:1200px){.promo{display:none}}
+.go:hover{filter:brightness(1.08)} .go:disabled{opacity:.6;cursor:progress}
+.try{margin-top:18px;color:var(--sub);font-size:13px}
+.equip{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;font-size:13px}
+.sw{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px}
+.sw input{position:absolute;opacity:0;width:1px;height:1px}
+.sw .track{width:38px;height:22px;border-radius:11px;background:var(--panel-3);border:1px solid var(--line);position:relative;transition:background .2s}
+.sw .knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#f4f2ff;transition:transform .2s}
+.sw input:checked + .track{background:linear-gradient(135deg,#8a77f5,#d985b7);border-color:transparent}
+.sw input:checked + .track .knob{transform:translateX(16px)}
+.sw input:focus-visible + .track{outline:2px solid var(--lav);outline-offset:2px}
+.equipbox{max-width:620px;margin:12px auto 0;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 18px;font-size:13px;color:var(--sub)}
+.equipbox ul{margin:0 0 10px;padding-left:18px} .equipbox li{margin:3px 0}
+.perm{display:flex;gap:8px;align-items:center;color:var(--text);font-weight:600;cursor:pointer}
+.chips{display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line-2);background:var(--panel);border-radius:18px;padding:6px 14px;font-size:13px;font-family:var(--mono)}
+.chip:hover{background:var(--panel-3)}
+.err{color:var(--coral);margin-top:16px;min-height:22px}
+.how{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:900px;margin:70px auto 0;text-align:left}
+.how div{padding:16px 18px}
+.how b{display:block;font-size:13px;margin-bottom:4px} .how b span{color:var(--peach);margin-right:6px}
+.how p{margin:0;color:var(--sub);font-size:13px;line-height:1.5}
+.mode{margin-top:28px;color:var(--dim);font-size:12px}
+@media (max-width:760px){.mark{font-size:46px}.how{grid-template-columns:1fr 1fr}form{flex-direction:column;align-items:center}.go{width:62px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="/scan"><i><svg width="13" height="13" viewBox="0 0 16 16"><path d="M1.5 7.6 14.5 2 10 14.2 7.6 9.1z" fill="#fff"/></svg></i>DebugPilot</a>
+  <nav class="tabs"><a href="/scan" aria-current="page">Scan a site</a><a href="/">Debug code</a></nav>
+  <div class="me"><b>BO</b>Brian Oh</div>
+</header>
+<nav class="subnav"><a href="/scan" class="on">Home</a><a href="/">Debug code<span class="new" style="margin-left:6px">Paste code</span></a></nav>
+
+<main class="home">
+  <aside class="promo box">
+    <span class="new">New</span>
+    <h3>Reports in plain words</h3>
+    <p>Every crash is explained without tech talk: what happens, why, and what the fix changes.</p>
+    <svg width="160" height="68" viewBox="0 0 160 68" aria-hidden="true">
+      <rect x="2" y="6" width="156" height="56" rx="8" fill="#191b37" stroke="#383b6b"/>
+      <rect x="14" y="18" width="40" height="6" rx="3" fill="#ffb59c"/>
+      <rect x="62" y="18" width="84" height="6" rx="3" fill="#a9a7cf" opacity=".6"/>
+      <rect x="14" y="32" width="40" height="6" rx="3" fill="#ffb59c"/>
+      <rect x="62" y="32" width="70" height="6" rx="3" fill="#a9a7cf" opacity=".6"/>
+      <rect x="14" y="46" width="40" height="6" rx="3" fill="#ffb59c"/>
+      <rect x="62" y="46" width="78" height="6" rx="3" fill="#6fe0bf" opacity=".8"/>
+    </svg>
+  </aside>
+  <svg xmlns="http://www.w3.org/2000/svg" class="mascot" width="132" height="126" viewBox="0 0 220 210" role="img" aria-label="DebugPilot's pilot cat holding a magnifying glass">
+  <defs>
+    <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.6"/>
+    </filter>
+  </defs>
+  <circle cx="110" cy="112" r="96" fill="#262951"/>
+  <circle cx="110" cy="112" r="96" fill="none" stroke="#383b6b" stroke-width="1.5"/>
+  <g filter="url(#hand)" stroke="#2a2350" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- tail -->
+    <path d="M150 170 C 196 168, 204 118, 176 104 C 168 100, 160 106, 166 112 C 182 122, 176 152, 146 156" fill="#b9aef7"/>
+    <!-- body -->
+    <path d="M62 196 C 50 160, 62 122, 104 118 C 146 116, 162 158, 150 196 Z" fill="#b9aef7"/>
+    <!-- belly patch -->
+    <path d="M88 196 C 84 170, 92 150, 106 150 C 122 150, 128 172, 122 196" fill="#f4f0ff" stroke-width="2.4"/>
+    <!-- head with ears -->
+    <path d="M60 92 C 56 70, 58 52, 66 34 C 76 42, 84 50, 90 56 C 100 53, 112 53, 122 56 C 130 48, 140 40, 150 34 C 158 52, 158 72, 152 92 C 148 118, 128 128, 106 128 C 84 128, 64 118, 60 92 Z" fill="#b9aef7"/>
+    <!-- inner ears -->
+    <path d="M69 46 C 74 50, 79 54, 82 58 C 76 60, 72 62, 69 66 C 68 58, 68 52, 69 46 Z" fill="#ffb59c" stroke-width="2"/>
+    <path d="M147 46 C 142 50, 137 54, 134 58 C 140 60, 144 62, 147 66 C 148 58, 148 52, 147 46 Z" fill="#ffb59c" stroke-width="2"/>
+    <!-- goggle strap and lenses, pushed up on the forehead -->
+    <path d="M62 74 C 90 64, 126 64, 154 74" fill="none" stroke-width="5" stroke="#2a2350"/>
+    <circle cx="88" cy="70" r="12" fill="#ffd9c7"/>
+    <circle cx="128" cy="70" r="12" fill="#ffd9c7"/>
+    <path d="M82 66 C 84 63, 88 62, 91 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>
+    <path d="M122 66 C 124 63, 128 62, 131 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>
+    <!-- eyes -->
+    <path d="M84 96 C 86 91, 92 91, 94 96" fill="none" stroke-width="3.4"/>
+    <path d="M118 96 C 120 91, 126 91, 128 96" fill="none" stroke-width="3.4"/>
+    <!-- cheeks -->
+    <ellipse cx="78" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>
+    <ellipse cx="134" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>
+    <!-- nose and mouth -->
+    <path d="M103 101 L 109 101 L 106 105 Z" fill="#e98aa8" stroke-width="2"/>
+    <path d="M106 105 C 106 110, 100 112, 98 108 M106 105 C 106 110, 112 112, 114 108" fill="none" stroke-width="2.4"/>
+    <!-- whiskers -->
+    <path d="M70 102 L 52 99 M70 108 L 52 110 M142 102 L 160 99 M142 108 L 160 110" fill="none" stroke-width="2"/>
+    <!-- scarf -->
+    <path d="M74 120 C 92 130, 120 130, 140 120 C 142 126, 140 132, 136 134 C 118 140, 94 140, 78 134 C 74 130, 72 126, 74 120 Z" fill="#ffb59c"/>
+    <path d="M128 132 C 140 142, 156 146, 168 140 C 164 150, 150 156, 134 146" fill="#e98aa8"/>
+    <!-- magnifying glass in a paw -->
+    <path d="M58 172 L 40 190" fill="none" stroke-width="9" stroke="#2a2350"/><path d="M57 173 L 41 189" fill="none" stroke-width="4" stroke="#d99a83"/>
+    <circle cx="70" cy="160" r="17" fill="#e9fbf5" fill-opacity=".85"/>
+    <path d="M61 153 C 64 149, 70 148, 74 150" fill="none" stroke="#ffffff" stroke-width="3"/>
+    <path d="M78 172 C 72 168, 74 160, 82 160 C 90 160, 92 170, 86 174 Z" fill="#b9aef7"/>
+  </g>
+</svg>
+  <h1 class="mark">Debug<span>Pilot</span></h1>
+  <p class="tagline">Paste a website. Find every crash. Get a fix that's proven in the live page.</p>
+  <form id="scanForm">
+    <div class="search">
+      <div class="cell"><b>Checks</b><span>Crashes + Speed</span></div>
+      <label class="cell grow" for="url"><b>Website</b><input id="url" type="text" inputmode="url" placeholder="example.com" autocomplete="off" required></label>
+    </div>
+    <button class="go" type="submit" id="go" aria-label="Scan"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+  </form>
+  <div class="equip">
+    <label class="sw"><input type="checkbox" id="equip"><span class="track"><span class="knob"></span></span><b>Equipment mode</b></label>
+    <span class="muted">Read-only scan for UPS, PDU, cooling and switchgear web pages on your network</span>
+  </div>
+  <div class="equipbox" id="equipBox" hidden>
+    <ul>
+      <li>Only opens pages and follows links. Never presses buttons or types anything.</li>
+      <li>Never opens control pages (Shutdown, Reboot, Outlets, Self test, Settings).</li>
+      <li>Blocks anything the page tries to send, so no setting or command can reach the device.</li>
+    </ul>
+    <label class="perm"><input type="checkbox" id="perm"> I have permission to test this equipment.</label>
+  </div>
+  <div class="err" id="err" role="alert"></div>
+  <div class="try">Or try one:</div>
+  <div class="chips">
+    <button class="chip" type="button" data-try="/demo/"></button>
+    <button class="chip" type="button" data-try="/demo-booking/"></button>
+    <button class="chip" type="button" data-try="/demo-power/"></button>
+    <button class="chip" type="button" data-try="https://the-internet.herokuapp.com/javascript_error"></button>
+  </div>
+
+  <section class="how" id="how">
+    <div class="box"><b><span>1</span>Visit</b><p>A hidden browser clicks buttons and fills boxes like a real visitor.</p></div>
+    <div class="box"><b><span>2</span>Catch</b><p>Every crash is saved with the exact steps that caused it.</p></div>
+    <div class="box"><b><span>3</span>Fix &amp; prove</b><p>It writes a fix, swaps it into the live page, and checks the crash is gone.</p></div>
+    <div class="box"><b><span>4</span>Speed</b><p>It loads the page like a phone on 4G and shows what's slow.</p></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+async function start(url) {
+  $("go").disabled = true; $("err").textContent = "";
+  try {
+    const equipment = $("equip").checked;
+    if (equipment && !$("perm").checked) throw new Error("Tick the box to confirm you have permission to test this equipment.");
+    const r = await fetch("/api/scan", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({url, equipment, permission: $("perm").checked})});
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.detail || "Couldn't start the scan");
+    location.href = "/report/" + j.id;          // results open on their own page
+  } catch (e) { $("err").textContent = e.message; $("go").disabled = false; }
+}
+$("perm").onchange = () => { $("err").textContent = ""; };
+$("equip").onchange = () => {
+  $("err").textContent = "";
+  const on = $("equip").checked;
+  $("equipBox").hidden = !on;
+  $("url").placeholder = on ? "Device address, like 192.168.1.50" : "example.com";
+  document.querySelector(".search .cell span").textContent = on ? "Equipment · read-only" : "Crashes + Speed";
+};
+$("scanForm").addEventListener("submit", e => { e.preventDefault(); start($("url").value); });
+// Each example button shows the actual link it scans.
+document.querySelectorAll("[data-try]").forEach(b => {
+  const u = b.dataset.try.startsWith("/") ? location.origin + b.dataset.try : b.dataset.try;
+  b.textContent = u.replace(/^https?:\/\//, "");
+  b.title = "Scan " + u;
+});
+document.querySelectorAll("[data-try]").forEach(b => b.onclick = e => { e.preventDefault();
+  const u = b.dataset.try.startsWith("/") ? location.origin + b.dataset.try : b.dataset.try; $("url").value = u; start(u);
+});
+</script>
+</body>
+</html>

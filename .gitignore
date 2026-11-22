@@ -1,0 +1,8 @@
+.env
+__pycache__/
+.pytest_cache/
+*.pyc
+data/
+*.db
+start-log.txt
+w64devkit*/

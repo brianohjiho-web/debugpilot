@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+:root{--bg:#13142a;--panel:#1f2142;--panel-3:#2c2e57;--line:#383b6b;--text:#f4f2ff;--sub:#a9a7cf;--coral:#ff8a7a;--mint:#6fe0bf;--peach:#ffb59c;
+  --grad:linear-gradient(135deg,#8a77f5,#d985b7);--dusk:linear-gradient(90deg,#3b3f8f,#7a62c9 45%,#e98aa8 78%,#ffb59c)}
+*{box-sizing:border-box} body{margin:0;width:340px;background:var(--bg);color:var(--text);font:14px/1.5 Roboto,"Segoe UI",system-ui,sans-serif}
+.strip{height:4px;background:var(--dusk)}
+header{display:flex;align-items:center;gap:8px;padding:14px 16px 4px;font-weight:800;font-size:16px}
+header img{width:22px;height:22px}
+main{padding:8px 16px 16px}
+.site{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.site small{display:block;color:var(--sub);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.site b{display:block;font-size:15px;word-break:break-all;margin-top:2px}
+.site span{display:block;color:var(--sub);font-size:12px;word-break:break-all}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px}
+#scan{width:100%;padding:12px;background:var(--grad);color:#fff;font-weight:700;font-size:15px}
+#scan:hover{filter:brightness(1.08)} #scan:disabled{opacity:.5;cursor:default;filter:none}
+.msg{margin-top:10px;font-size:13px;min-height:20px}
+.msg.err{color:var(--coral)} .msg.ok{color:var(--mint)}
+.what{margin:12px 0 0;padding:0;list-style:none;color:var(--sub);font-size:12.5px}
+.what li{padding:3px 0 3px 18px;position:relative} .what li::before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--peach)}
+details{margin-top:12px;color:var(--sub);font-size:12px} summary{cursor:pointer}
+.row{display:flex;gap:6px;margin-top:8px}
+input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:7px 9px;font:inherit;font-size:12px}
+#save{background:var(--panel-3);color:var(--text);padding:0 12px;font-size:12px}
+a{color:var(--peach)}
+</style>
+</head>
+<body>
+<div class="strip"></div>
+<header><img src="icon48.png" alt="">DebugPilot</header>
+<main>
+  <div class="site"><small>This page</small><b id="host">…</b><span id="url"></span></div>
+  <button id="scan" type="button">Scan this page</button>
+  <div class="msg" id="msg" role="status"></div>
+  <ul class="what">
+    <li>Clicks around like a visitor and catches crashes</li>
+    <li>Writes a fix and proves it in the live page</li>
+    <li>Checks speed like a phone on 4G</li>
+  </ul>
+  <details><summary>Settings</summary>
+    <div style="margin-top:8px">DebugPilot address</div>
+    <div class="row"><input id="server" type="text" spellcheck="false"><button id="save" type="button">Save</button></div>
+    <div style="margin-top:6px">Use <b>http://localhost:8000</b> when it runs on this computer.</div>
+  </details>
+</main>
+<script src="scan.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

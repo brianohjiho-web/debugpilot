@@ -1,0 +1,31 @@
+services:
+  app:
+    build: { context: ., dockerfile: Dockerfile.app }
+    ports: ["8000:8000"]
+    env_file: .env
+    volumes: ["debugpilot-data:/app/data"]
+    environment:
+      RUNNER_URL: http://runner:8001
+    networks: [public, sandbox]
+    depends_on: [runner]
+
+  # Runs untrusted code. Locked down on purpose:
+  runner:
+    build: { context: ., dockerfile: Dockerfile.runner }
+    networks: [sandbox]            # internal-only network: no internet access
+    read_only: true                # can't change its own files
+    tmpfs:
+      - /tmp:size=512m,exec        # each run gets a throwaway folder here
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 256                # stops fork bombs
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+networks:
+  public: {}
+  sandbox:
+    internal: true
+
+volumes:
+  debugpilot-data:

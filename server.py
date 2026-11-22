@@ -1,0 +1,397 @@
+"""The web app: serves the page and the /api endpoints.
+
+Where code runs:
+  - RUNNER_URL set (the Docker setup): code runs in the separate, locked-down runner container.
+  - RUNNER_URL not set (quick local try): code runs on this machine. Only paste code you trust.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+import httpx
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
+
+from agent.agent import ClaudeLLM, DebugAgent
+from agent.examples import EXAMPLES
+from agent.github import GitHubError, open_pull_request, pr_body
+from runner.languages import LABELS, TEST_RULES
+from runner.languages import run as run_local
+
+RUNNER_URL = os.environ.get("RUNNER_URL", "").rstrip("/")
+HERE = Path(__file__).parent
+
+# A portable C/C++ compiler unzipped into the DebugPilot folder (w64devkit) is picked up
+# automatically, so there's nothing to install or add to PATH.
+for _kit in sorted(HERE.glob("w64devkit*/bin")) + sorted(HERE.glob("w64devkit*/w64devkit/bin")):
+    if (_kit / "gcc.exe").exists() or (_kit / "gcc").exists():
+        os.environ["PATH"] = str(_kit) + os.pathsep + os.environ.get("PATH", "")
+        break
+
+
+def run_code(language: str, source: str, test: str, setup: str = "") -> dict:
+    if RUNNER_URL:
+        r = httpx.post(f"{RUNNER_URL}/run", json={"language": language, "source": source,
+                                                   "test": test, "setup": setup}, timeout=120)
+        r.raise_for_status()
+        return r.json()
+    return run_local(language, source, test, setup).to_dict()
+
+
+def make_llm():
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    return ClaudeLLM()
+
+
+app = FastAPI(title="DebugPilot debug agent")
+
+
+@app.middleware("http")
+async def no_stale_pages(request, call_next):
+    """Pages always load fresh, so a change never hides behind a browser's saved copy."""
+    resp = await call_next(request)
+    if (resp.headers.get("content-type") or "").startswith(("text/html", "text/css")):
+        resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+class DebugRequest(BaseModel):
+    language: str
+    source: str = Field(max_length=100_000)
+    error: str = Field(default="", max_length=20_000)
+
+
+class PRRequest(BaseModel):
+    repo: str
+    path: str
+    report: dict
+    base: str | None = None
+
+
+@app.get("/")
+def index():
+    return FileResponse(HERE / "web" / "index.html")
+
+
+@app.get("/api/config")
+def config():
+    return {
+        "languages": {k: LABELS[k] for k in TEST_RULES},
+        "claude": bool(os.environ.get("ANTHROPIC_API_KEY")),
+        "github": bool(os.environ.get("GITHUB_TOKEN")),
+        "sandbox": "container" if RUNNER_URL else "this machine",
+        "examples": {k: {"source": v["source"], "error": v["error"]} for k, v in EXAMPLES.items()},
+    }
+
+
+@app.post("/api/debug")
+def debug(req: DebugRequest):
+    agent = DebugAgent(runner=run_code, llm=make_llm())
+    return agent.debug(req.language, req.source, req.error).to_dict()
+
+
+@app.post("/api/pr")
+def pull_request(req: PRRequest):
+    token = os.environ.get("GITHUB_TOKEN")
+    if not token:
+        raise HTTPException(400, "Set GITHUB_TOKEN in .env to open pull requests.")
+    rep = req.report
+    if not rep.get("verified") or not rep.get("answer"):
+        raise HTTPException(400, "Only verified fixes can become a pull request.")
+    a = rep["answer"]
+    try:
+        url = open_pull_request(token, req.repo, req.path, a["fixed_source"], a.get("pr_title") or "Fix from debug agent",
+                                pr_body(rep), req.base or None)
+    except GitHubError as e:
+        raise HTTPException(400, str(e))
+    return {"url": url}
+
+
+# ======================================================================
+# Website watching: crashes from real visitors -> automatic, tested fixes
+# ======================================================================
+import json as _json
+import shutil
+import time as _time
+from collections import defaultdict, deque
+
+from fastapi import Request
+from fastapi.responses import JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
+
+from agent import autofix, store
+from agent.crashes import fingerprint, normalize
+
+DEMO_DIR = Path(os.environ.get("DEBUGPILOT_DEMO_DIR") or HERE / "demo-site")
+DEMO_KEY = "dp_demo"
+CORS = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"}
+_rate: dict[str, deque] = defaultdict(deque)
+RATE_PER_MIN = 300
+
+store.init()
+
+
+def _seed_demo():
+    """A ready-made local project for the demo shop, so the loop works on first run."""
+    if os.environ.get("DEBUGPILOT_DEMO", "1") != "1" or store.project_by_key(DEMO_KEY):
+        return
+    store.create_project("Little Shop (demo)", "local", str(DEMO_DIR), "", "", True, url_prefix="demo", key=DEMO_KEY)
+
+
+_seed_demo()
+
+
+class NoCacheDemo(StaticFiles):
+    async def get_response(self, path, scope):
+        resp = await super().get_response(path, scope)
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+
+
+app.mount("/demo-booking", NoCacheDemo(directory=HERE / "demo-booking", html=True), name="demo-booking")
+app.mount("/demo-power", NoCacheDemo(directory=HERE / "demo-power", html=True), name="demo-power")
+app.mount("/demo", NoCacheDemo(directory=DEMO_DIR, html=True), name="demo")
+
+
+@app.get("/watch.js")
+def watch_js():
+    return FileResponse(HERE / "watcher" / "watch.js", media_type="application/javascript",
+                        headers={"Cache-Control": "public, max-age=300", "Access-Control-Allow-Origin": "*"})
+
+
+@app.options("/api/ingest")
+def ingest_preflight():
+    return Response(status_code=204, headers=CORS)
+
+
+@app.post("/api/ingest")
+async def ingest(request: Request):
+    """Receives crash reports from watch.js on any website. Always answers fast."""
+    raw = await request.body()
+    if len(raw) > 20_000:
+        return Response(status_code=413, headers=CORS)
+    try:
+        event = _json.loads(raw.decode("utf-8", errors="replace"))
+    except ValueError:
+        return Response(status_code=400, headers=CORS)
+    proj = store.project_by_key(str(event.get("key", "")))
+    if not proj:
+        return Response(status_code=404, headers=CORS)
+    q, now = _rate[proj["key"]], _time.time()
+    while q and now - q[0] > 60:
+        q.popleft()
+    if len(q) >= RATE_PER_MIN:
+        return Response(status_code=429, headers=CORS)
+    q.append(now)
+
+    ev, frame = normalize(event, proj.get("path_prefix") or "", proj.get("url_prefix") or "")
+    iss, fresh = store.record_event(proj["id"], fingerprint(ev["type"], frame, ev["message"]), frame, ev)
+    if proj["auto_fix"] and (fresh or iss["status"] == "new"):
+        autofix.queue_fix(iss["id"], run_code, make_llm)
+    return JSONResponse({"ok": True, "issue": iss["id"]}, headers=CORS)
+
+
+class ProjectIn(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+    source: str = Field(pattern="^(github|local)$")
+    repo: str = Field(min_length=1, max_length=300)
+    branch: str = ""
+    path_prefix: str = ""
+    url_prefix: str = ""
+    auto_fix: bool = True
+
+
+@app.get("/api/projects")
+def list_projects():
+    return store.projects()
+
+
+@app.post("/api/projects")
+def add_project(p: ProjectIn):
+    if p.source == "local" and os.environ.get("DEBUGPILOT_ALLOW_LOCAL", "1") != "1":
+        raise HTTPException(400, "Local folders are turned off on this server. Use a GitHub repository.")
+    if p.source == "github" and "/" not in p.repo:
+        raise HTTPException(400, "Use the owner/name form, like brianoh/my-site.")
+    return store.create_project(p.name, p.source, p.repo.strip(), p.branch.strip(), p.path_prefix.strip(), p.auto_fix, p.url_prefix.strip())
+
+
+@app.get("/api/projects/{pid}/issues")
+def project_issues(pid: int):
+    if not store.project(pid):
+        raise HTTPException(404, "No such project")
+    return store.issues(pid)
+
+
+@app.get("/api/issues/{iid}")
+def get_issue(iid: int):
+    iss = store.issue(iid)
+    if not iss:
+        raise HTTPException(404, "No such issue")
+    return iss
+
+
+@app.post("/api/issues/{iid}/fix")
+def refix(iid: int):
+    if not store.issue(iid):
+        raise HTTPException(404, "No such issue")
+    started = autofix.queue_fix(iid, run_code, make_llm)
+    return {"started": started}
+
+
+@app.post("/api/issues/{iid}/apply")
+def apply_fix(iid: int):
+    try:
+        return autofix.apply_local_fix(iid)
+    except autofix.SourceError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/demo/reset")
+def reset_demo():
+    """Put the demo shop's bugs back and clear its issues, so the demo can be shown again."""
+    proj = store.project_by_key(DEMO_KEY)
+    if not proj:
+        raise HTTPException(404, "The demo project is turned off")
+    shutil.copyfile(DEMO_DIR / "_original" / "cart.js", DEMO_DIR / "cart.js")
+    store.reset_project_issues(proj["id"])
+    return {"ok": True}
+
+
+
+
+# ---------------------------------------------------------------- Scan any website (nothing to install)
+import asyncio
+import sys
+
+
+def _run_async(coro):
+    """Run a scan in its own event loop. On Windows the hidden browser needs the Proactor loop,
+    even when the server runs in auto-restart mode (which switches the default loop)."""
+    if sys.platform == "win32":
+        with asyncio.Runner(loop_factory=asyncio.ProactorEventLoop) as r:
+            return r.run(coro)
+    return asyncio.run(coro)
+import re
+import threading
+import time
+import uuid
+from urllib.parse import urlparse
+
+from agent import scanner
+
+SCANS: dict[str, dict] = {}
+SCAN_DIR = Path(os.environ.get("DEBUGPILOT_DATA") or HERE / "data") / "scans"
+_scan_slots = threading.Semaphore(int(os.environ.get("DEBUGPILOT_SCAN_SLOTS", "2")))
+
+
+class ScanIn(BaseModel):
+    url: str = Field(max_length=500)
+    equipment: bool = False       # read-only scan of a device page (UPS, PDU, cooling, switchgear)
+    permission: bool = False      # the person confirmed they're allowed to test that equipment
+
+
+def _from_this_computer(request: Request) -> bool:
+    host = (request.client.host if request.client else "") or ""
+    return host in ("127.0.0.1", "::1", "localhost") or host.startswith("::ffff:127.")
+
+
+def _scan_job(job_id: str, url: str, allow_private: bool, equipment: bool = False):
+    job = SCANS[job_id]
+    with _scan_slots:
+        job["status"] = "running"
+        try:
+            def found(bugs):   # crashes so far, shown on the report page while the scan runs
+                job["found"] = [{"id": b["id"], "type": b["type"], "message": b["message"][:200],
+                                 "where": f"{(b.get('frame') or {}).get('func') or '?'}() · {((b.get('frame') or {}).get('url') or '').split('/')[-1]}:{(b.get('frame') or {}).get('line') or '?'}"}
+                                for b in bugs]
+            rep = _run_async(scanner.scan(url, llm=make_llm(), allow_private=allow_private,
+                                           progress=lambda m: job.__setitem__("progress", m), on_found=found,
+                                           equipment=equipment))
+            job["report"] = rep
+            job["status"] = "done"
+        except scanner.ScanBlocked as e:
+            job["status"], job["error"] = "error", str(e)
+        except Exception as e:  # browser crashed, timeout, etc.
+            job["status"], job["error"] = "error", f"The scan stopped: {str(e).splitlines()[0][:200]}"
+        job["progress"] = ""
+
+
+@app.post("/api/scan")
+def start_scan(body: ScanIn, request: Request):
+    url = body.url.strip()
+    # Private addresses are blocked, except this server's own demo shop (or when you allow it for local testing).
+    target = urlparse(url if "://" in url else "http://" + url)
+    same = lambda a, b: a.replace("127.0.0.1", "localhost") == b.replace("127.0.0.1", "localhost")
+    own_demo = same(target.netloc, request.url.netloc) and target.path.startswith("/demo")
+    allow_private = own_demo or os.environ.get("DEBUGPILOT_SCAN_ALLOW_PRIVATE") == "1"
+    if body.equipment:
+        if not body.permission:
+            raise HTTPException(400, "Tick the box to confirm you have permission to test this equipment.")
+        # Device pages live on private networks. Only allow that when DebugPilot runs on your own computer,
+        # so a copy hosted online can never be used to poke at someone else's network.
+        if not _from_this_computer(request) and os.environ.get("DEBUGPILOT_SCAN_ALLOW_PRIVATE") != "1":
+            raise HTTPException(400, "Equipment on a local network can only be scanned when DebugPilot runs on your own computer.")
+        allow_private = True
+    try:
+        url = scanner.check_url(url, allow_private, "http" if body.equipment else "https")
+    except scanner.ScanBlocked as e:
+        raise HTTPException(400, str(e))
+    busy = sum(1 for j in SCANS.values() if j["status"] in ("queued", "running"))
+    if busy >= 6:
+        raise HTTPException(429, "Too many scans running. Try again in a minute.")
+    job_id = uuid.uuid4().hex[:12]
+    SCANS[job_id] = {"id": job_id, "url": url, "status": "queued", "progress": "Waiting to start", "started": time.time()}
+    SCANS[job_id]["equipment"] = body.equipment
+    threading.Thread(target=_scan_job, args=(job_id, url, allow_private, body.equipment), daemon=True).start()
+    return SCANS[job_id]
+
+
+@app.get("/api/scan/{job_id}")
+def scan_status(job_id: str):
+    job = SCANS.get(job_id)
+    if not job:
+        raise HTTPException(404, "No such scan")
+    return job
+
+
+@app.get("/api/scan/{job_id}/video/{name}")
+def scan_video(job_id: str, name: str):
+    if job_id not in SCANS or not re.fullmatch(r"bug\d+-(before|after)\.webm", name):
+        raise HTTPException(404, "No such video")
+    f = SCAN_DIR / job_id / name
+    if not f.exists():
+        raise HTTPException(404, "No such video")
+    return FileResponse(f, media_type="video/webm")
+
+
+@app.get("/scan")
+def scan_page():
+    return FileResponse(HERE / "web" / "scan.html")
+
+
+@app.get("/api/demo/recommendations")
+async def demo_recommendations():
+    await asyncio.sleep(1.4)   # slow on purpose, for the speed check
+    return ["Travel mug", "Tote bag", "Sticker pack"]
+
+
+@app.get("/report/{job_id}")
+def report_page(job_id: str):
+    return FileResponse(HERE / "web" / "report.html")
+
+
+@app.get("/img/{name}")
+def image(name: str):
+    if name not in ("cat-happy.svg", "cat-search.svg", "cat-yay.svg"):
+        raise HTTPException(404, "No such image")
+    return FileResponse(HERE / "web" / "img" / name, media_type="image/svg+xml")
+
+
+@app.get("/theme.css")
+def theme_css():
+    return FileResponse(HERE / "web" / "theme.css", media_type="text/css")

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lakeview Hotel · DebugPilot demo site</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f6f4ef;color:#1f2a37}
+header{padding:20px 28px;background:linear-gradient(90deg,#1f4e5f,#3d7a8c);color:#fff}
+header b{font-size:20px} header span{opacity:.8;margin-left:10px;font-size:14px}
+main{max-width:760px;margin:0 auto;padding:28px;display:grid;gap:16px}
+.card{background:#fff;border:1px solid #e5e0d6;border-radius:14px;padding:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.card h2{width:100%;margin:0 0 4px;font-size:16px}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#5b6676}
+input,select{font:inherit;padding:8px 10px;border:1px solid #d9d3c7;border-radius:9px;min-width:200px}
+button{font:inherit;cursor:pointer;border:0;border-radius:9px;background:#1f4e5f;color:#fff;padding:9px 14px;font-weight:600}
+.msg{min-height:22px;font-size:14px;color:#b3261e} .msg.ok{color:#1d7a46}
+</style></head>
+<body>
+<header><b>Lakeview Hotel</b><span>A demo booking site checked by DebugPilot</span></header>
+<main>
+  <section class="card"><h2>Rooms</h2>
+    <label>Room<select id="room"><option value="">Choose a room</option><option value="queen">Queen room</option><option value="king">King suite</option></select></label>
+    <button id="price">Get price</button></section>
+  <section class="card"><h2>Guest name badge</h2>
+    <label>Full name<input id="name" placeholder="Jane Smith"></label>
+    <button id="badge">Make name badge</button></section>
+  <section class="card"><h2>Spa times</h2>
+    <label>Day<input id="day" placeholder="Monday"></label>
+    <button id="times">Show free times</button></section>
+  <div id="msg" class="msg"></div>
+</main>
+<script src="booking.js"></script>
+<script src="app.js"></script>
+</body></html>

@@ -1,0 +1,8 @@
+<!doctype html><html><body>
+<nav><a href="index.html">Status</a> <a href="battery.html">Battery</a> <a href="log.html">Event Log</a>
+<a href="outlets.html">Outlet Control</a> <a href="/cgi/shutdown">Shutdown</a></nav>
+<h1>UPS Status</h1><p>Output: 120 V</p>
+<button id="selftest" onclick="fetch('/api/selftest',{method:'POST'})">Run Self Test</button>
+<button id="off" onclick="fetch('/api/power',{method:'POST',body:'off'})">Turn Off UPS</button>
+<button id="refresh" onclick="fetch('/api/refresh',{method:'POST'})">Refresh</button>
+</body></html>

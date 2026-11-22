@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DebugPilot · Report</title>
+<link rel="stylesheet" href="/theme.css">
+<style>
+/* Report page: flat, document-like. Color is used only for status. */
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px 96px}
+.back{display:inline-block;color:var(--sub);font-size:13px;margin:22px 0 18px}
+.back:hover{color:var(--text)}
+h2.title{font-size:15px;margin:0 0 10px}
+
+/* header */
+.rhead{display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid var(--line-2)}
+.rhead .k{font-size:12px;color:var(--dim);margin-bottom:2px}
+.rhead h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.4px;word-break:break-all;line-height:1.25}
+.rhead .meta{color:var(--sub);font-size:13px;margin-top:6px}
+.rhead .acts{margin-left:auto;display:flex;gap:8px}
+.b2{border:1px solid var(--line);background:none;border-radius:7px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--body)}
+.b2:hover{border-color:var(--sub);color:var(--text)}
+.b2.main{background:var(--text);border-color:var(--text);color:var(--bg)}
+.b2.main:hover{background:#fff}
+.safe{display:inline-block;margin-top:8px;font-size:12px;color:var(--mint);border:1px solid var(--mint-line);border-radius:6px;padding:1px 8px}
+
+/* overview */
+.lead{font-size:17px;line-height:1.55;color:var(--text);margin:26px 0 22px;max-width:62ch}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line-2);border-radius:10px;margin-bottom:40px}
+.nums div{padding:16px 20px;border-left:1px solid var(--line-2)} .nums div:first-child{border-left:0}
+.nums span{display:block;font-size:12.5px;color:var(--sub)}
+.nums b{display:block;font-size:26px;font-weight:700;letter-spacing:-.5px;margin-top:2px}
+.sec{margin-bottom:40px}
+.sec>h2{display:flex;align-items:baseline;gap:10px;font-size:16px;margin:0 0 10px;font-weight:700}
+.sec>h2 small{font-size:13px;font-weight:400;color:var(--sub)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:12px;font-weight:600;color:var(--dim);padding:0 12px 8px;border-bottom:1px solid var(--line-2)}
+.tbl td{padding:14px 12px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.tbl tr.go{cursor:pointer} .tbl tr.go:hover td{background:var(--panel-2)}
+.tbl .n{width:34px;color:var(--dim);font-variant-numeric:tabular-nums}
+.tbl .t{font-weight:600;color:var(--text);line-height:1.45}
+.tbl .w{font-family:var(--mono);font-size:12px;color:var(--sub);margin-top:3px}
+.tbl .r{text-align:right;white-space:nowrap}
+.tbl .arrow{color:var(--dim);width:20px;text-align:right}
+.st{display:inline-flex;align-items:center;gap:7px;font-size:13px;white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--coral)}
+.st.good::before{background:var(--mint)} .st.ok::before{background:var(--peach)}
+.st.good{color:var(--mint)} .st.poor{color:var(--coral)} .st.ok{color:var(--peach)}
+.more{font-size:13px;color:var(--sub);border-top:1px solid var(--line-2);padding:12px 0}
+.more summary{cursor:pointer;color:var(--body)} .more summary:hover{color:var(--text)}
+.more ul{margin:10px 0 0;padding-left:18px;font-family:var(--mono);font-size:12px;word-break:break-all;color:var(--body)}
+.nothing{display:flex;gap:18px;align-items:center;padding:20px 0}
+
+/* loading */
+.loading{padding:28px 26px;max-width:560px;margin:30px auto}
+.loading h2{margin:0 0 4px;font-size:18px}
+.lcat{float:right;width:96px;height:auto;margin:-8px -6px 0 12px}
+@media (prefers-reduced-motion:no-preference){.lcat{animation:bob 1.6s ease-in-out infinite}}
+@keyframes bob{50%{transform:translateY(-5px) rotate(-3deg)}}
+.steps{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.steps li{display:flex;align-items:center;gap:10px;color:var(--dim)}
+.steps li i{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-style:normal;font-size:11px}
+.steps li.done{color:var(--sub)} .steps li.done i{background:var(--mint);border-color:var(--mint);color:#13142a}
+.steps li.now{color:var(--text);font-weight:600} .steps li.now i{border-color:var(--peach);border-top-color:transparent;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.steps li.now i{animation:none}}
+.sub2{color:var(--sub);font-size:13px;margin-top:14px}
+
+/* crash cards on the overview */
+.card2{max-width:820px;padding:30px 0 34px;border-top:1px solid var(--line-2)} .card2:first-of-type{border-top:0;padding-top:6px}
+.card2 .ct{margin:6px 0 4px;font-size:18px;line-height:1.4;font-weight:700}
+.card2 .facts{margin-top:16px}
+.pair .blk{margin-top:22px;min-width:0}
+.blk h3 small{font-weight:400;margin-left:6px}
+.morelink{display:inline-block;margin-top:16px;font-size:13px;color:var(--peach)} .morelink:hover{text-decoration:underline}
+/* crashes: list + document */
+.split{display:grid;grid-template-columns:250px minmax(0,1fr);gap:40px;align-items:start;margin-top:26px}
+.clist{position:sticky;top:16px;display:flex;flex-direction:column;border-left:1px solid var(--line-2)}
+.citem{text-align:left;border:0;background:none;padding:10px 0 10px 16px;margin-left:-1px;border-left:2px solid transparent;display:block;color:var(--sub)}
+.citem:hover{color:var(--text)}
+.citem.on{border-left-color:var(--text);color:var(--text)}
+.citem .num{font-size:12px;display:flex;align-items:center;gap:8px}
+.citem b{display:block;font-size:13.5px;line-height:1.4;font-weight:600;margin-top:2px}
+.doc{max-width:720px}
+.top1{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--sub)}
+.doc h2{margin:8px 0 6px;font-size:22px;line-height:1.35;letter-spacing:-.3px;font-weight:700}
+.doc .loc{font-size:13px;color:var(--sub)}
+.doc .loc code{font-family:var(--mono);font-size:12.5px;color:var(--body)}
+.blk{margin-top:30px}
+.blk h3{font-size:14px;font-weight:700;margin:0 0 8px;color:var(--text)}
+.blk p{margin:0 0 8px;color:var(--body);line-height:1.65}
+.blk ol{margin:0;padding-left:20px;color:var(--body)} .blk ol li{margin:4px 0;padding-left:4px}
+.facts{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px 18px;margin-top:22px;padding:18px 0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+.facts dt{color:var(--sub);font-size:13px;padding-top:1px}
+.facts dd{margin:0;color:var(--text);line-height:1.6}
+.note{border-left:2px solid var(--peach);padding:2px 0 2px 12px;color:var(--body);margin-top:18px;font-size:13.5px}
+pre{margin:0;background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;font:12px/1.65 var(--mono);color:#d2d0ec;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.file{font-family:var(--mono);font-size:12px;color:var(--sub);margin-bottom:6px}
+.code,.diff{background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 0;font:12px/1.75 var(--mono);overflow-x:auto}
+.cl{display:flex;white-space:pre;padding-right:14px}
+.cl .ln{flex:none;width:48px;padding-right:14px;text-align:right;color:var(--dim);user-select:none}
+.cl .cc{color:#cfcde8}
+.cl.hit{background:var(--coral-bg)} .cl.hit .ln{color:var(--coral)} .cl.hit .cc{color:#ffe1dc}
+.cl.mark .cc{color:var(--coral)}
+.diff div{white-space:pre;padding:0 14px;color:#cfcde8} .diff .a{background:#1b3440;color:#a9f3da} .diff .d{background:#382342;color:#ffb9ae}
+.proof{width:100%;border-collapse:collapse;font-size:13.5px;border:1px solid var(--line-2);border-radius:8px}
+.proof td{padding:10px 14px;border-bottom:1px solid var(--line-2)} .proof tr:last-child td{border-bottom:0}
+.proof td:first-child{color:var(--sub);width:42%}
+.err-more{margin-top:30px;font-size:13px;color:var(--sub)}
+.err-more summary{cursor:pointer} .err-more pre{margin-top:10px}
+.nav2{display:flex;justify-content:space-between;margin-top:40px;padding-top:16px;border-top:1px solid var(--line-2);font-size:13px}
+.nav2 a{color:var(--sub)} .nav2 a:hover{color:var(--text)}
+
+/* speed */
+.pages{display:flex;gap:6px;margin:26px 0 0;flex-wrap:wrap}
+.pages button{border:1px solid var(--line-2);background:none;border-radius:6px;padding:4px 10px;font-size:12px;color:var(--sub)}
+.pages button.on{color:var(--text);border-color:var(--sub)}
+.hint{font-size:12.5px;color:var(--dim)}
+.tips{margin:0;padding:0;list-style:none} .tips li{padding:12px 0;border-bottom:1px solid var(--line-2);color:var(--body)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.li{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:10px;align-items:center;padding:7px 0}
+.li .nm{font-family:var(--mono);font-size:12px;color:var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .tr{height:4px;border-radius:2px;background:var(--panel-3);margin-top:6px;overflow:hidden}
+.li .tr i{display:block;height:100%;background:var(--sub)} .li .tr i.hot{background:var(--coral)}
+.li .v{text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
+.empty{padding:40px 0;color:var(--sub)}
+.err{padding:24px;color:var(--coral)}
+@media (max-width:860px){.split,.two{grid-template-columns:1fr;gap:24px}.clist{position:static}.nums{grid-template-columns:1fr 1fr}.nums div:nth-child(3){border-left:0}.nums div:nth-child(n+3){border-top:1px solid var(--line-2)}.rhead .acts{margin-left:0}.facts{grid-template-columns:1fr;gap:2px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="/scan"><i><svg width="13" height="13" viewBox="0 0 16 16"><path d="M1.5 7.6 14.5 2 10 14.2 7.6 9.1z" fill="#fff"/></svg></i>DebugPilot</a>
+  <nav class="tabs"><a href="/scan" aria-current="page">Scan a site</a><a href="/">Debug code</a></nav>
+  <div class="me"><b>BO</b>Brian Oh</div>
+</header>
+<nav class="subnav" id="subnav"><a href="/scan">Home</a></nav>
+<main class="wrap" id="app"><div class="box loading"><h2>Loading…</h2></div></main>
+
+<script>
+const $ = id => document.getElementById(id);
+const CAT_SEARCH = '<svg xmlns="http://www.w3.org/2000/svg" class="lcat" width="96" height="92" viewBox="0 0 220 210" role="img" aria-label="DebugPilot\'s cat searching with a magnifying glass">\n  <defs>\n    <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">\n      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>\n      <feDisplacementMap in="SourceGraphic" scale="2.6"/>\n    </filter>\n  </defs>\n  <circle cx="110" cy="112" r="96" fill="#262951"/>\n  <circle cx="110" cy="112" r="96" fill="none" stroke="#383b6b" stroke-width="1.5"/>\n  <g filter="url(#hand)" stroke="#2a2350" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">\n    <!-- tail -->\n    <path d="M150 170 C 196 168, 204 118, 176 104 C 168 100, 160 106, 166 112 C 182 122, 176 152, 146 156" fill="#b9aef7"/>\n    <!-- body -->\n    <path d="M62 196 C 50 160, 62 122, 104 118 C 146 116, 162 158, 150 196 Z" fill="#b9aef7"/>\n    <!-- belly patch -->\n    <path d="M88 196 C 84 170, 92 150, 106 150 C 122 150, 128 172, 122 196" fill="#f4f0ff" stroke-width="2.4"/>\n    <!-- head with ears -->\n    <path d="M60 92 C 56 70, 58 52, 66 34 C 76 42, 84 50, 90 56 C 100 53, 112 53, 122 56 C 130 48, 140 40, 150 34 C 158 52, 158 72, 152 92 C 148 118, 128 128, 106 128 C 84 128, 64 118, 60 92 Z" fill="#b9aef7"/>\n    <!-- inner ears -->\n    <path d="M69 46 C 74 50, 79 54, 82 58 C 76 60, 72 62, 69 66 C 68 58, 68 52, 69 46 Z" fill="#ffb59c" stroke-width="2"/>\n    <path d="M147 46 C 142 50, 137 54, 134 58 C 140 60, 144 62, 147 66 C 148 58, 148 52, 147 46 Z" fill="#ffb59c" stroke-width="2"/>\n    <!-- goggle strap and lenses, pushed up on the forehead -->\n    <path d="M62 74 C 90 64, 126 64, 154 74" fill="none" stroke-width="5" stroke="#2a2350"/>\n    <circle cx="88" cy="70" r="12" fill="#ffd9c7"/>\n    <circle cx="128" cy="70" r="12" fill="#ffd9c7"/>\n    <path d="M82 66 C 84 63, 88 62, 91 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>\n    <path d="M122 66 C 124 63, 128 62, 131 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>\n    <!-- eyes -->\n    <ellipse cx="88" cy="95" rx="5" ry="6.5" fill="#2a2350" stroke="none"/>\n    <ellipse cx="124" cy="95" rx="5" ry="6.5" fill="#2a2350" stroke="none"/>\n    <circle cx="86.5" cy="92.5" r="1.8" fill="#ffffff" stroke="none"/>\n    <circle cx="122.5" cy="92.5" r="1.8" fill="#ffffff" stroke="none"/>\n    <!-- cheeks -->\n    <ellipse cx="78" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>\n    <ellipse cx="134" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>\n    <!-- nose and mouth -->\n    <path d="M103 101 L 109 101 L 106 105 Z" fill="#e98aa8" stroke-width="2"/>\n    <path d="M102 110 C 104 108, 108 108, 110 110" fill="none" stroke-width="2.4"/>\n    <!-- whiskers -->\n    <path d="M70 102 L 52 99 M70 108 L 52 110 M142 102 L 160 99 M142 108 L 160 110" fill="none" stroke-width="2"/>\n    <!-- scarf -->\n    <path d="M74 120 C 92 130, 120 130, 140 120 C 142 126, 140 132, 136 134 C 118 140, 94 140, 78 134 C 74 130, 72 126, 74 120 Z" fill="#ffb59c"/>\n    <path d="M128 132 C 140 142, 156 146, 168 140 C 164 150, 150 156, 134 146" fill="#e98aa8"/>\n    <!-- magnifying glass in a paw -->\n    <path d="M58 172 L 40 190" fill="none" stroke-width="9" stroke="#2a2350"/><path d="M57 173 L 41 189" fill="none" stroke-width="4" stroke="#d99a83"/>\n    <circle cx="70" cy="160" r="17" fill="#e9fbf5" fill-opacity=".85"/>\n    <path d="M61 153 C 64 149, 70 148, 74 150" fill="none" stroke="#ffffff" stroke-width="3"/>\n    <path d="M78 172 C 72 168, 74 160, 82 160 C 90 160, 92 170, 86 174 Z" fill="#b9aef7"/>\n  </g>\n</svg>';
+const CAT_YAY = '<svg xmlns="http://www.w3.org/2000/svg" width="84" height="80" style="flex:none" viewBox="0 0 220 210" role="img" aria-label="DebugPilot\'s cat cheering, nothing broke">\n  <defs>\n    <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">\n      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>\n      <feDisplacementMap in="SourceGraphic" scale="2.6"/>\n    </filter>\n  </defs>\n  <circle cx="110" cy="112" r="96" fill="#262951"/>\n  <circle cx="110" cy="112" r="96" fill="none" stroke="#383b6b" stroke-width="1.5"/>\n  <g filter="url(#hand)" stroke="#2a2350" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">\n    <!-- tail -->\n    <path d="M150 170 C 196 168, 204 118, 176 104 C 168 100, 160 106, 166 112 C 182 122, 176 152, 146 156" fill="#b9aef7"/>\n    <!-- body -->\n    <path d="M62 196 C 50 160, 62 122, 104 118 C 146 116, 162 158, 150 196 Z" fill="#b9aef7"/>\n    <!-- belly patch -->\n    <path d="M88 196 C 84 170, 92 150, 106 150 C 122 150, 128 172, 122 196" fill="#f4f0ff" stroke-width="2.4"/>\n    <!-- head with ears -->\n    <path d="M60 92 C 56 70, 58 52, 66 34 C 76 42, 84 50, 90 56 C 100 53, 112 53, 122 56 C 130 48, 140 40, 150 34 C 158 52, 158 72, 152 92 C 148 118, 128 128, 106 128 C 84 128, 64 118, 60 92 Z" fill="#b9aef7"/>\n    <!-- inner ears -->\n    <path d="M69 46 C 74 50, 79 54, 82 58 C 76 60, 72 62, 69 66 C 68 58, 68 52, 69 46 Z" fill="#ffb59c" stroke-width="2"/>\n    <path d="M147 46 C 142 50, 137 54, 134 58 C 140 60, 144 62, 147 66 C 148 58, 148 52, 147 46 Z" fill="#ffb59c" stroke-width="2"/>\n    <!-- goggle strap and lenses, pushed up on the forehead -->\n    <path d="M62 74 C 90 64, 126 64, 154 74" fill="none" stroke-width="5" stroke="#2a2350"/>\n    <circle cx="88" cy="70" r="12" fill="#ffd9c7"/>\n    <circle cx="128" cy="70" r="12" fill="#ffd9c7"/>\n    <path d="M82 66 C 84 63, 88 62, 91 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>\n    <path d="M122 66 C 124 63, 128 62, 131 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>\n    <!-- eyes -->\n    <path d="M84 96 C 86 91, 92 91, 94 96" fill="none" stroke-width="3.4"/>\n    <path d="M118 96 C 120 91, 126 91, 128 96" fill="none" stroke-width="3.4"/>\n    <!-- cheeks -->\n    <ellipse cx="78" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>\n    <ellipse cx="134" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>\n    <!-- nose and mouth -->\n    <path d="M103 101 L 109 101 L 106 105 Z" fill="#e98aa8" stroke-width="2"/>\n    <path d="M106 105 C 106 110, 100 112, 98 108 M106 105 C 106 110, 112 112, 114 108" fill="none" stroke-width="2.4"/>\n    <!-- whiskers -->\n    <path d="M70 102 L 52 99 M70 108 L 52 110 M142 102 L 160 99 M142 108 L 160 110" fill="none" stroke-width="2"/>\n    <!-- scarf -->\n    <path d="M74 120 C 92 130, 120 130, 140 120 C 142 126, 140 132, 136 134 C 118 140, 94 140, 78 134 C 74 130, 72 126, 74 120 Z" fill="#ffb59c"/>\n    <path d="M128 132 C 140 142, 156 146, 168 140 C 164 150, 150 156, 134 146" fill="#e98aa8"/>\n    <!-- magnifying glass in a paw -->\n    <path d="M58 172 L 40 190" fill="none" stroke-width="9" stroke="#2a2350"/><path d="M57 173 L 41 189" fill="none" stroke-width="4" stroke="#d99a83"/>\n    <circle cx="70" cy="160" r="17" fill="#e9fbf5" fill-opacity=".85"/>\n    <path d="M61 153 C 64 149, 70 148, 74 150" fill="none" stroke="#ffffff" stroke-width="3"/>\n    <path d="M78 172 C 72 168, 74 160, 82 160 C 90 160, 92 170, 86 174 Z" fill="#b9aef7"/>\n      <path d="M176 44 L 180 34 L 184 44 L 194 48 L 184 52 L 180 62 L 176 52 L 166 48 Z" fill="#ffd9c7" stroke-width="2"/>\n    <path d="M36 70 L 39 63 L 42 70 L 49 73 L 42 76 L 39 83 L 36 76 L 29 73 Z" fill="#6fe0bf" stroke-width="2"/>\n    <path d="M186 92 L 188 88 L 190 92 L 194 94 L 190 96 L 188 100 L 186 96 L 182 94 Z" fill="#b9aef7" stroke-width="1.6"/>\n  </g>\n</svg>';
+const CAT_YAY_BIG = '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="115" style="display:block;margin:0 auto 8px" viewBox="0 0 220 210" role="img" aria-label="DebugPilot\'s cat cheering, nothing broke">\n  <defs>\n    <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">\n      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>\n      <feDisplacementMap in="SourceGraphic" scale="2.6"/>\n    </filter>\n  </defs>\n  <circle cx="110" cy="112" r="96" fill="#262951"/>\n  <circle cx="110" cy="112" r="96" fill="none" stroke="#383b6b" stroke-width="1.5"/>\n  <g filter="url(#hand)" stroke="#2a2350" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">\n    <!-- tail -->\n    <path d="M150 170 C 196 168, 204 118, 176 104 C 168 100, 160 106, 166 112 C 182 122, 176 152, 146 156" fill="#b9aef7"/>\n    <!-- body -->\n    <path d="M62 196 C 50 160, 62 122, 104 118 C 146 116, 162 158, 150 196 Z" fill="#b9aef7"/>\n    <!-- belly patch -->\n    <path d="M88 196 C 84 170, 92 150, 106 150 C 122 150, 128 172, 122 196" fill="#f4f0ff" stroke-width="2.4"/>\n    <!-- head with ears -->\n    <path d="M60 92 C 56 70, 58 52, 66 34 C 76 42, 84 50, 90 56 C 100 53, 112 53, 122 56 C 130 48, 140 40, 150 34 C 158 52, 158 72, 152 92 C 148 118, 128 128, 106 128 C 84 128, 64 118, 60 92 Z" fill="#b9aef7"/>\n    <!-- inner ears -->\n    <path d="M69 46 C 74 50, 79 54, 82 58 C 76 60, 72 62, 69 66 C 68 58, 68 52, 69 46 Z" fill="#ffb59c" stroke-width="2"/>\n    <path d="M147 46 C 142 50, 137 54, 134 58 C 140 60, 144 62, 147 66 C 148 58, 148 52, 147 46 Z" fill="#ffb59c" stroke-width="2"/>\n    <!-- goggle strap and lenses, pushed up on the forehead -->\n    <path d="M62 74 C 90 64, 126 64, 154 74" fill="none" stroke-width="5" stroke="#2a2350"/>\n    <circle cx="88" cy="70" r="12" fill="#ffd9c7"/>\n    <circle cx="128" cy="70" r="12" fill="#ffd9c7"/>\n    <path d="M82 66 C 84 63, 88 62, 91 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>\n    <path d="M122 66 C 124 63, 128 62, 131 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>\n    <!-- eyes -->\n    <path d="M84 96 C 86 91, 92 91, 94 96" fill="none" stroke-width="3.4"/>\n    <path d="M118 96 C 120 91, 126 91, 128 96" fill="none" stroke-width="3.4"/>\n    <!-- cheeks -->\n    <ellipse cx="78" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>\n    <ellipse cx="134" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>\n    <!-- nose and mouth -->\n    <path d="M103 101 L 109 101 L 106 105 Z" fill="#e98aa8" stroke-width="2"/>\n    <path d="M106 105 C 106 110, 100 112, 98 108 M106 105 C 106 110, 112 112, 114 108" fill="none" stroke-width="2.4"/>\n    <!-- whiskers -->\n    <path d="M70 102 L 52 99 M70 108 L 52 110 M142 102 L 160 99 M142 108 L 160 110" fill="none" stroke-width="2"/>\n    <!-- scarf -->\n    <path d="M74 120 C 92 130, 120 130, 140 120 C 142 126, 140 132, 136 134 C 118 140, 94 140, 78 134 C 74 130, 72 126, 74 120 Z" fill="#ffb59c"/>\n    <path d="M128 132 C 140 142, 156 146, 168 140 C 164 150, 150 156, 134 146" fill="#e98aa8"/>\n    <!-- magnifying glass in a paw -->\n    <path d="M58 172 L 40 190" fill="none" stroke-width="9" stroke="#2a2350"/><path d="M57 173 L 41 189" fill="none" stroke-width="4" stroke="#d99a83"/>\n    <circle cx="70" cy="160" r="17" fill="#e9fbf5" fill-opacity=".85"/>\n    <path d="M61 153 C 64 149, 70 148, 74 150" fill="none" stroke="#ffffff" stroke-width="3"/>\n    <path d="M78 172 C 72 168, 74 160, 82 160 C 90 160, 92 170, 86 174 Z" fill="#b9aef7"/>\n      <path d="M176 44 L 180 34 L 184 44 L 194 48 L 184 52 L 180 62 L 176 52 L 166 48 Z" fill="#ffd9c7" stroke-width="2"/>\n    <path d="M36 70 L 39 63 L 42 70 L 49 73 L 42 76 L 39 83 L 36 76 L 29 73 Z" fill="#6fe0bf" stroke-width="2"/>\n    <path d="M186 92 L 188 88 L 190 92 L 194 94 L 190 96 L 188 100 L 186 96 L 182 94 Z" fill="#b9aef7" stroke-width="1.6"/>\n  </g>\n</svg>';
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const JOB = location.pathname.split("/").pop();
+const vid = n => `/api/scan/${JOB}/video/${n}`;
+const ms = v => v >= 1000 ? (v / 1000).toFixed(1) + " s" : Math.round(v) + " ms";
+const kb = v => v >= 1e6 ? (v / 1e6).toFixed(1) + " MB" : Math.max(1, Math.round(v / 1000)) + " KB";
+const fmt = m => m.unit === "ms" ? ms(m.value) : m.unit === "bytes" ? kb(m.value) : m.value;
+const GRADE = {good: "Good", ok: "Fair", poor: "Slow"};
+const HELP = {"Server response": "how fast the site starts answering", "Main content shows": "how long until the main part appears",
+  "Fully loaded": "when everything has finished loading", "Page size": "how much a phone has to download",
+  "Layout jumps": "how much things shift while loading"};
+let R = null, tab = "overview", sel = null, pageIx = 0, timer = null;
+
+/* ---------- loading ---------- */
+const STAGES = [["Opening the site", /Opening/], ["Trying what visitors do", /Trying/], ["Fixing crashes and checking speed", /Fixing|speed/]];
+function loading(j) {
+  const p = j.progress || "";
+  let at = STAGES.findIndex(s => s[1].test(p)); if (at < 0) at = 0;
+  $("app").innerHTML = `<a class="back" href="/scan">← New scan</a><div class="box loading">${CAT_SEARCH}<h2>Scanning ${esc(j.url)}</h2><div class="muted">This takes about a minute. You can leave this page open.</div>
+    <ul class="steps">${STAGES.map((s, i) => `<li class="${i < at ? "done" : i === at ? "now" : ""}"><i>${i < at ? "✓" : ""}</i>${s[0]}</li>`).join("")}</ul>
+    <div class="sub2">${esc(p)}</div></div>
+    ${(j.found || []).length ? `<h2 class="title" style="max-width:560px;margin:0 auto 10px">Found so far <span class="muted" style="font-weight:400">(fixes come next)</span></h2>
+      <div style="max-width:560px;margin:0 auto"><table class="tbl">${j.found.map(f => `<tr><td class="n">${f.id}</td><td><div class="t">${esc(f.message)}</div><div class="w">${esc(f.where)}</div></td></tr>`).join("")}</table></div>` : ""}`;
+}
+async function poll() {
+  let j;
+  try { const r = await fetch(`/api/scan/${JOB}`); if (r.status === 404) throw new Error("This report isn't available anymore. Reports are kept until DebugPilot restarts."); j = await r.json(); }
+  catch (e) { clearInterval(timer); $("app").innerHTML = `<a class="back" href="/scan">← New scan</a><div class="box err">${esc(e.message)}</div>`; return; }
+  if (j.status === "done") { clearInterval(timer); R = j.report; document.title = "DebugPilot · " + host(R.url); readHash(); render(); return; }
+  if (j.status === "error") { clearInterval(timer); $("app").innerHTML = `<a class="back" href="/scan">← New scan</a><div class="box err">${esc(j.error)}</div>`; return; }
+  loading(j);
+}
+
+/* ---------- helpers ---------- */
+function host(u) { return ((u.match(/\/\/([^/]+)/) || [])[1] || u).replace(/^www\./, ""); }
+function where(b) { const f = b.frame || {}; return `${f.func ? f.func + "()" : "?"} · ${(f.url || "").split("/").pop() || "?"}${f.line ? ":" + f.line : ""}`; }
+function diff(oldc, newc) {
+  const A = oldc.split("\n"), B = newc.split("\n"); let i = 0; while (i < A.length && i < B.length && A[i] === B[i]) i++;
+  let a = A.length - 1, b = B.length - 1; while (a >= i && b >= i && A[a] === B[b]) { a--; b--; }
+  const row = (c, t) => `<div class="${c}">${c === "a" ? "+" : c === "d" ? "-" : " "} ${esc(t)}</div>`;
+  return A.slice(0, i).map(t => row("", t)).join("") + A.slice(i, a + 1).map(t => row("d", t)).join("") + B.slice(i, b + 1).map(t => row("a", t)).join("") + A.slice(a + 1).map(t => row("", t)).join("");
+}
+const title = b => (b.fix && b.fix.summary) || `${b.type}: ${b.message}`;
+const statusText = b => b.status === "proven" ? "Fix proven" : b.status === "unproven" ? "Fix didn't work" : "No fix yet";
+function readHash() { const h = location.hash.slice(1).split("/"); if (["overview", "crashes", "speed"].includes(h[0])) tab = h[0]; if (h[1]) sel = +h[1]; }
+function go(t, id) { tab = t; if (id) sel = id; history.replaceState(null, "", "#" + t + (t === "crashes" && sel ? "/" + sel : "")); render(); scrollTo({top: 0}); }
+
+/* ---------- page ---------- */
+const stClass = b => b.status === "proven" ? "good" : b.status === "unproven" ? "ok" : "poor";
+const stText = b => b.status === "proven" ? "Fix tested" : b.status === "unproven" ? "Fix didn't hold" : "No fix yet";
+const fileOf = b => ((b.script || (b.frame || {}).url || "").split("/").pop() || "the page");
+function locLine(b) {
+  const f = b.frame || {};
+  return `${f.func ? `<code>${esc(f.func)}()</code> in ` : ""}<code>${esc(fileOf(b))}</code>${f.line ? `, line ${f.line}` : ""} · happened ${b.times} time${b.times === 1 ? "" : "s"} during the scan`;
+}
+function render() {
+  const proven = R.bugs.filter(b => b.status === "proven").length;
+  const when = new Date().toLocaleString([], {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"});
+  let h = `<a class="back" href="/scan">← New scan</a>
+  <div class="rhead"><div>
+      <div class="k">Scan report</div>
+      <h1>${esc(R.url.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</h1>
+      <div class="meta">${when} · ${R.pages.length} page${R.pages.length > 1 ? "s" : ""} · ${R.tries} things tried · took ${Math.round(R.seconds)} s</div>
+      ${R.equipment_mode ? `<span class="safe">Equipment safe mode · read-only</span>` : ""}
+    </div>
+    <div class="acts"><button class="b2" id="copy" type="button">Copy report</button><button class="b2 main" id="again" type="button">Scan again</button></div></div>`;
+  $("subnav").innerHTML = `<a href="/scan">Home</a>
+    <a href="#overview" data-t="overview" class="${tab === "overview" ? "on" : ""}">Overview</a>
+    <a href="#crashes" data-t="crashes" class="${tab === "crashes" ? "on" : ""}">Crashes<span class="count">${R.bugs.length}</span></a>
+    <a href="#speed" data-t="speed" class="${tab === "speed" ? "on" : ""}">Speed</a>
+    <a href="/">Debug code</a>`;
+  h += tab === "overview" ? overview(proven) : tab === "crashes" ? crashes() : speed();
+  $("app").innerHTML = h;
+  document.querySelectorAll("[data-t]").forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.t); });
+  document.querySelectorAll("[data-c]").forEach(a => a.onclick = e => { e.preventDefault(); go("crashes", +a.dataset.c); });
+  document.querySelectorAll("[data-p]").forEach(a => a.onclick = () => { pageIx = +a.dataset.p; render(); });
+  $("copy").onclick = async () => { try { await navigator.clipboard.writeText(markdown()); $("copy").textContent = "Copied"; } catch (e) { $("copy").textContent = "Couldn't copy"; } };
+  $("again").onclick = async () => { const r = await fetch("/api/scan", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({url: R.url, equipment: !!R.equipment_mode, permission: !!R.equipment_mode})}); const j = await r.json(); if (r.ok) location.href = "/report/" + j.id; };
+}
+
+function overview(proven) {
+  const n = R.bugs.length, sp = (R.speed || []).find(s => s.metrics);
+  const lcp = sp && sp.metrics[1];
+  let lead;
+  if (!n) lead = `Nothing broke. DebugPilot tried ${R.tries} things a visitor might do and the page handled all of them.`;
+  else lead = `DebugPilot found <b>${n} crash${n === 1 ? "" : "es"}</b> on this site. ` +
+    (proven === n ? `${n === 1 ? "It has" : `All ${n} have`} a fix that was tested on the live page.` : proven ? `${proven} of them ${proven === 1 ? "has" : "have"} a fix that was tested on the live page.` : `None of them have a tested fix yet.`);
+  let h = `<p class="lead">${lead}</p>
+  <div class="nums">
+    <div><span>Crashes</span><b class="${n ? "poor" : ""}">${n}</b></div>
+    <div><span>Fixed and tested</span><b class="${proven ? "good" : ""}">${proven}</b></div>
+    <div><span>Things tried</span><b>${R.tries}</b></div>
+    <div><span>Main content shows</span><b class="${lcp ? lcp.grade : ""}">${lcp ? fmt(lcp) : "—"}</b></div>
+  </div>`;
+  if (n) h += `<div class="sec"><h2>Crashes <small>Where the page breaks, the code behind it, and the fix</small></h2>${R.bugs.map(card).join("")}</div>`;
+  else h += `<div class="sec nothing">${CAT_YAY}<p class="muted" style="margin:0">No crashes in ${R.tries} tries. That's a good sign, but it doesn't prove there are none.</p></div>`;
+  if (sp) h += `<div class="sec"><h2>Speed <small>How fast the page loads for a visitor on a phone (4G)</small></h2>
+    <table class="tbl"><tbody>${sp.metrics.map(m => `<tr><td><span class="t" style="font-weight:500">${esc(m.label)}</span><span class="hint"> · ${esc(HELP[m.label] || "")}</span></td><td class="r" style="font-variant-numeric:tabular-nums">${fmt(m)}</td><td class="r" style="width:90px"><span class="st ${m.grade}">${GRADE[m.grade]}</span></td></tr>`).join("")}</tbody></table>
+    ${sp.tips.length ? `<p style="margin:12px 0 0;font-size:13px"><a href="#speed" data-t="speed" style="color:var(--peach)">${sp.tips.length} thing${sp.tips.length === 1 ? "" : "s"} slowing it down ›</a></p>` : ""}</div>`;
+  const extras = [];
+  if (R.equipment_mode) extras.push(`<details class="more"><summary>Safe mode: 0 buttons pressed, ${(R.blocked || []).length} send${(R.blocked || []).length === 1 ? "" : "s"} blocked</summary>${(R.blocked || []).length ? `<ul>${R.blocked.map(x => `<li>${esc(x)}</li>`).join("")}</ul><p>All of these were stopped before reaching the device.</p>` : "<p>The pages didn't try to send anything.</p>"}</details>`);
+  if (R.console.length || R.failed.length) extras.push(`<details class="more"><summary>${R.console.length} console error${R.console.length === 1 ? "" : "s"}, ${R.failed.length} failed request${R.failed.length === 1 ? "" : "s"}</summary><ul>${R.console.map(x => `<li>${esc(x)}</li>`).join("")}${R.failed.map(x => `<li>Failed: ${esc(x)}</li>`).join("")}</ul></details>`);
+  if (R.pages.length > 1) extras.push(`<details class="more"><summary>Pages scanned (${R.pages.length})</summary><ul>${R.pages.map(x => `<li>${esc(x)}</li>`).join("")}</ul></details>`);
+  return h + (extras.length ? `<div class="sec"><h2>Other details <small>Extra things noticed during the scan</small></h2>${extras.join("")}</div>` : "");
+}
+
+// One crash, open on the overview: short facts, the broken code, and the change.
+function card(b) {
+  const fx = b.fix || null;
+  return `<article class="card2"><div class="top1"><span>Crash ${b.id}</span><span class="st ${stClass(b)}">${stText(b)}</span></div>
+    <h3 class="ct">${esc(title(b))}</h3><div class="loc">${locLine(b)}</div>
+    <dl class="facts"><dt>What happens</dt><dd>${esc(whatHappens(b))}</dd><dt>Why</dt><dd>${esc(fx && fx.root_cause ? fx.root_cause : plainError(b))}</dd>
+      ${fx ? `<dt>The fix</dt><dd>${esc(fx.fix_plain || "A small check so the code handles this case instead of breaking.")}</dd>` : ""}</dl>
+    <div class="pair">${b.window ? `<section class="blk"><h3>The code that breaks</h3>${codeView(b)}</section>` : ""}
+    ${fx && fx.old_code ? `<section class="blk"><h3>The fix <small class="hint">red = removed, green = added</small></h3><div class="file">${esc(fileOf(b))}</div><div class="diff">${diff(fx.old_code, fx.new_code)}</div></section>` : ""}</div>
+    <a class="morelink" href="#" data-c="${b.id}">Steps, proof and full error ›</a></article>`;
+}
+
+function crashes() {
+  if (!R.bugs.length) return `<div class="empty nothing">${CAT_YAY}No crashes found in ${R.tries} tries.</div>`;
+  if (!R.bugs.some(b => b.id === sel)) sel = R.bugs[0].id;
+  const i = R.bugs.findIndex(x => x.id === sel), b = R.bugs[i];
+  const list = `<nav class="clist">${R.bugs.map(x => `<button type="button" class="citem ${x.id === sel ? "on" : ""}" data-c="${x.id}"><span class="num">Crash ${x.id}<span class="st ${stClass(x)}" style="font-size:12px">${stText(x)}</span></span><b>${esc(title(x))}</b></button>`).join("")}</nav>`;
+  const prev = R.bugs[i - 1], next = R.bugs[i + 1];
+  const nav = `<div class="nav2">${prev ? `<a href="#" data-c="${prev.id}">‹ Crash ${prev.id}</a>` : "<span></span>"}${next ? `<a href="#" data-c="${next.id}">Crash ${next.id} ›</a>` : "<span></span>"}</div>`;
+  return `<div class="split">${list}<article class="doc">${detail(b)}${nav}</article></div>`;
+}
+
+// Turns common browser error messages into everyday words.
+function plainError(b) {
+  const m = b.message || "";
+  let x;
+  if ((x = m.match(/Cannot read propert(?:y|ies) of null \(reading '(toFixed|toString|length|map)'\)/)))
+    return "The code expected a number or a list, but got an empty value (like a sensor sending no reading), so it stopped.";
+  if ((x = m.match(/Cannot read propert(?:y|ies) of (undefined|null)(?: \(reading '([^']+)'\))?/)) || (x = m.match(/(undefined|null) is not an object(?: \(evaluating '[^']*?\.?([\w$]+)'\))?/)))
+    return `The code tried to use ${x[2] ? `“${x[2]}” on ` : ""}something that wasn't there.`;
+  if ((x = m.match(/([\w$.]+) is not defined/))) return `The code uses something called “${x[1]}” that was never set up. Often it's a typo or a file that didn't load.`;
+  if ((x = m.match(/([\w$.]+) is not a function/))) return `The code tried to run “${x[1]}” as an action, but it isn't one.`;
+  if (/SyntaxError|Unexpected token|Unexpected end/.test(b.type + m)) return "There's a typo in the code, so the browser couldn't read it at all.";
+  if (/Maximum call stack/.test(m)) return "The code got stuck calling itself over and over until the browser gave up.";
+  if (/fetch|NetworkError|Load failed/i.test(m)) return "The page asked a server for data and didn't get an answer.";
+  if (/JSON/.test(m)) return "The page expected data in one format and got something else.";
+  return "The code ran into a situation it didn't expect and stopped.";
+}
+
+// The site's own code around the crash, with the broken line marked.
+function codeView(b) {
+  const f = b.frame || {};
+  const rows = (b.window || "").split("\n");
+  const numbered = rows.every(r => /^\s*\d+ \| /.test(r));
+  let body;
+  if (numbered) {
+    body = rows.map(r => {
+      const m = r.match(/^\s*(\d+) \| (.*)$/); const n = +m[1], code = m[2];
+      const hit = n === f.line;
+      let row = `<div class="cl${hit ? " hit" : ""}"><span class="ln">${n}</span><span class="cc">${esc(code) || " "}</span></div>`;
+      if (hit && f.col) row += `<div class="cl mark"><span class="ln"></span><span class="cc">${" ".repeat(Math.max(0, f.col - 1))}^ breaks here</span></div>`;
+      return row;
+    }).join("");
+  } else body = `<div class="cl"><span class="ln"></span><span class="cc">${esc(b.window)}</span></div>`;
+  return `<div class="file">${esc(fileOf(b))}${f.line ? ` · line ${f.line}` : ""}</div><div class="code">${body}</div>
+    ${!numbered ? `<p class="hint" style="margin-top:6px">This file is squished into one long line, so this shows the part around the crash.</p>` : ""}`;
+}
+
+function whatHappens(b) {
+  const who = R.equipment_mode ? "an operator" : "a visitor";
+  return b.steps_text.length > 1 ? `The page breaks when ${who} does this: ${b.steps_text.slice(1).map(s => s[0].toLowerCase() + s.slice(1)).join(", then ")}.` : "The page breaks as soon as it opens.";
+}
+function detail(b) {
+  const fx = b.fix || null, who = R.equipment_mode ? "an operator" : "a visitor";
+  const what = whatHappens(b);
+  let d = `<div class="top1"><span>Crash ${b.id} of ${R.bugs.length}</span><span class="st ${stClass(b)}">${stText(b)}</span></div>
+    <h2>${esc(title(b))}</h2><div class="loc">${locLine(b)}</div>
+    <dl class="facts"><dt>What happens</dt><dd>${esc(what)}</dd>
+      <dt>Why</dt><dd>${esc(fx && fx.root_cause ? fx.root_cause : plainError(b))}</dd>
+      ${fx ? `<dt>The fix</dt><dd>${esc(fx.fix_plain || "A small check so the code handles this case instead of breaking.")}</dd>` : ""}</dl>`;
+  if (b.note) d += `<div class="note">${esc(b.note)}</div>`;
+  d += `<section class="blk"><h3>Steps to make it crash</h3><ol>${b.steps_text.map(s => `<li>${esc(s)}</li>`).join("")}</ol></section>`;
+  if (b.window) d += `<section class="blk"><h3>The code that breaks</h3>${codeView(b)}<p style="margin-top:10px">${esc(plainError(b))}</p></section>`;
+  if (fx && fx.old_code) d += `<section class="blk"><h3>The change</h3><p>Red lines are removed, green lines are added.</p><div class="diff">${diff(fx.old_code, fx.new_code)}</div></section>`;
+  if (fx && b.status !== "found") d += `<section class="blk"><h3>Proof</h3><p>DebugPilot ran the same steps twice in the live page.</p>
+    <table class="proof"><tr><td>With the site's code</td><td><span class="st poor">Crashed</span></td></tr>
+    <tr><td>With the fix swapped in</td><td>${b.status === "proven" ? `<span class="st good">No crash</span>` : `<span class="st ok">Still crashed or broke something else</span>`}</td></tr></table></section>`;
+  if (fx && (fx.next_steps || []).length) d += `<section class="blk"><h3>What to do next</h3><ol>${fx.next_steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol></section>`;
+  d += `<details class="err-more"><summary>Full error message</summary><pre>${esc(b.type)}: ${esc(b.message)}\n${esc((b.stack || "").split("\n").slice(1, 4).join("\n"))}</pre></details>`;
+  return d;
+}
+
+function speed() {
+  const all = (R.speed || []); if (!all.length) return `<div class="empty">Speed wasn't measured.</div>`;
+  const sp = all[Math.min(pageIx, all.length - 1)];
+  let h = all.length > 1 ? `<div class="pages">${all.map((s, i) => `<button type="button" data-p="${i}" class="${i === pageIx ? "on" : ""}">${esc(s.url.replace(/^https?:\/\//, ""))}</button>`).join("")}</div>` : "";
+  if (sp.error) return h + `<div class="err">${esc(sp.error)}</div>`;
+  const lcp = sp.metrics[1], size = sp.metrics[3];
+  const verdict = lcp.grade === "good" ? "That's fast." : lcp.grade === "ok" ? "That's a bit slow. Some visitors will notice." : "That's slow. Many visitors give up on pages this slow.";
+  h += `<p class="lead">On a phone with 4G, visitors wait about <b>${fmt(lcp)}</b> before the main part of this page shows up. ${verdict} The page downloads ${fmt(size)}${size.grade === "good" ? "." : ", which uses a lot of mobile data."}</p>
+  <div class="sec"><h2>Numbers <small>Measured like a phone on 4G</small></h2><table class="tbl"><tbody>${sp.metrics.map(m => `<tr><td><span class="t" style="font-weight:500">${esc(m.label)}</span><span class="hint"> · ${esc(HELP[m.label] || "")}</span></td><td class="r" style="font-variant-numeric:tabular-nums">${fmt(m)}</td><td class="r" style="width:90px"><span class="st ${m.grade}">${GRADE[m.grade]}</span></td></tr>`).join("")}</tbody></table></div>
+  <div class="sec"><h2>What's slowing it down <small>Things to fix first</small></h2>${sp.tips.length ? `<ul class="tips">${sp.tips.map(t => `<li>${esc(t.text)}</li>`).join("")}</ul>` : `<p class="muted">Nothing big.</p>`}</div>`;
+  const bars = (list, key, f, hot) => { const max = Math.max(1, ...list.map(r => r[key])); return list.map(r => `<div class="li"><div><div class="nm" title="${esc(r.url)}">${esc(r.name)}</div><div class="tr"><i class="${hot(r) ? "hot" : ""}" style="width:${Math.max(3, 100 * r[key] / max)}%"></i></div></div><div class="v ${hot(r) ? "poor" : ""}">${f(r[key])}</div></div>`).join(""); };
+  h += `<div class="two"><div class="sec"><h2>Slowest downloads <small>Files that took longest</small></h2>${bars(sp.slowest, "ms", ms, r => r.ms > 1000)}</div>
+    <div class="sec"><h2>Biggest downloads <small>Files that weigh the most</small></h2>${bars(sp.biggest, "bytes", kb, r => r.bytes > 300000)}</div></div>`;
+  return h;
+}
+
+function markdown() {
+  let m = `# Website report: ${R.url}\n\nScanned ${R.pages.length} page(s), tried ${R.tries} things, found ${R.bugs.length} crash(es).\n`;
+  R.bugs.forEach(b => { const fx = b.fix || {};
+    m += `\n## ${b.id}. ${title(b)}\n\n**Steps:**\n${b.steps_text.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\n**Error:** \`${b.type}: ${b.message}\` in ${where(b)}\n`;
+    if (fx.root_cause) m += `\n**Why:** ${fx.root_cause}\n`;
+    if (fx.old_code) m += `\n**Fix${b.status === "proven" ? " (tested: the steps no longer crash with it)" : ""}:**\n\n\`\`\`diff\n${fx.old_code.split("\n").map(l => "- " + l).join("\n")}\n${fx.new_code.split("\n").map(l => "+ " + l).join("\n")}\n\`\`\`\n`;
+  });
+  (R.speed || []).filter(s => s.metrics).forEach(s => {
+    m += `\n## Speed: ${s.url} (phone on 4G)\n\n${s.metrics.map(x => `- ${x.label}: ${fmt(x)} (${GRADE[x.grade]})`).join("\n")}\n`;
+    if (s.tips.length) m += `\n${s.tips.map(t => "- " + t.text).join("\n")}\n`;
+  });
+  return m + `\n_Found with DebugPilot by Brian Oh._\n`;
+}
+
+timer = setInterval(poll, 1200); poll();
+</script>
+</body>
+</html>
