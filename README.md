@@ -154,15 +154,19 @@ flowchart LR
     B --> C["Claude AI<br/>(thinks up the fix)"]
     B --> D["Safe box<br/>(tests the code)"]
     D --> E["8 languages:<br/>Python, JavaScript, SQL, C,<br/>C++, Java, Go, R"]
+    D --> F["Result<br/>A tested fix and a report<br/>for a person to check"]
 
     style A fill:#e8e4ff,stroke:#8f7bff,color:#12132a
     style B fill:#ffe0e8,stroke:#ff9bb0,color:#12132a
     style C fill:#e0f4ff,stroke:#5bb5e8,color:#12132a
     style D fill:#e0ffe8,stroke:#4cc97a,color:#12132a
     style E fill:#fff6d9,stroke:#e8b84c,color:#12132a
+    style F fill:#d9f7e4,stroke:#2e9e5b,stroke-width:3px,color:#12132a
 ```
 
 In short: you ask in your browser, the app asks Claude for a fix, and the safe box checks that the fix really works.
+
+**Result:** you get a fix that was tested and a report. A person looks at it before anything changes.
 
 ### Folders
 
