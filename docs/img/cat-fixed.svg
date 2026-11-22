@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 210" role="img" aria-label="DebugPilot's cat holding a check mark: the fix works">
+  <defs>
+    <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.6"/>
+    </filter>
+  </defs>
+  <circle cx="110" cy="112" r="96" fill="#262951"/>
+  <circle cx="110" cy="112" r="96" fill="none" stroke="#383b6b" stroke-width="1.5"/>
+  <g filter="url(#hand)" stroke="#2a2350" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- tail -->
+    <path d="M150 170 C 196 168, 204 118, 176 104 C 168 100, 160 106, 166 112 C 182 122, 176 152, 146 156" fill="#b9aef7"/>
+    <!-- body -->
+    <path d="M62 196 C 50 160, 62 122, 104 118 C 146 116, 162 158, 150 196 Z" fill="#b9aef7"/>
+    <!-- belly patch -->
+    <path d="M88 196 C 84 170, 92 150, 106 150 C 122 150, 128 172, 122 196" fill="#f4f0ff" stroke-width="2.4"/>
+    <!-- head with ears -->
+    <path d="M60 92 C 56 70, 58 52, 66 34 C 76 42, 84 50, 90 56 C 100 53, 112 53, 122 56 C 130 48, 140 40, 150 34 C 158 52, 158 72, 152 92 C 148 118, 128 128, 106 128 C 84 128, 64 118, 60 92 Z" fill="#b9aef7"/>
+    <!-- inner ears -->
+    <path d="M69 46 C 74 50, 79 54, 82 58 C 76 60, 72 62, 69 66 C 68 58, 68 52, 69 46 Z" fill="#ffb59c" stroke-width="2"/>
+    <path d="M147 46 C 142 50, 137 54, 134 58 C 140 60, 144 62, 147 66 C 148 58, 148 52, 147 46 Z" fill="#ffb59c" stroke-width="2"/>
+    <!-- goggle strap and lenses, pushed up on the forehead -->
+    <path d="M62 74 C 90 64, 126 64, 154 74" fill="none" stroke-width="5" stroke="#2a2350"/>
+    <circle cx="88" cy="70" r="12" fill="#ffd9c7"/>
+    <circle cx="128" cy="70" r="12" fill="#ffd9c7"/>
+    <path d="M82 66 C 84 63, 88 62, 91 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>
+    <path d="M122 66 C 124 63, 128 62, 131 63" fill="none" stroke="#ffffff" stroke-width="2.4"/>
+    <!-- eyes -->
+    <path d="M84 96 C 86 91, 92 91, 94 96" fill="none" stroke-width="3.4"/>
+    <path d="M118 96 C 120 91, 126 91, 128 96" fill="none" stroke-width="3.4"/>
+    <!-- cheeks -->
+    <ellipse cx="78" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>
+    <ellipse cx="134" cy="106" rx="7" ry="4.5" fill="#ffb59c" stroke="none" opacity=".8"/>
+    <!-- nose and mouth -->
+    <path d="M103 101 L 109 101 L 106 105 Z" fill="#e98aa8" stroke-width="2"/>
+    <path d="M98 108 C 100 117, 112 117, 114 108 Z" fill="#e98aa8" stroke-width="2.2"/>
+    <!-- whiskers -->
+    <path d="M70 102 L 52 99 M70 108 L 52 110 M142 102 L 160 99 M142 108 L 160 110" fill="none" stroke-width="2"/>
+    <!-- scarf -->
+    <path d="M74 120 C 92 130, 120 130, 140 120 C 142 126, 140 132, 136 134 C 118 140, 94 140, 78 134 C 74 130, 72 126, 74 120 Z" fill="#ffb59c"/>
+    <path d="M128 132 C 140 142, 156 146, 168 140 C 164 150, 150 156, 134 146" fill="#e98aa8"/>
+    <!-- card with a check mark -->
+    <rect x="36" y="140" width="52" height="44" rx="8" fill="#e9fbf5" transform="rotate(-8 62 162)"/>
+    <path d="M48 162 L 58 172 L 76 150" fill="none" stroke="#2f9d7e" stroke-width="5"/>
+    <path d="M80 180 C 74 176, 76 168, 84 168 C 92 168, 94 178, 88 182 Z" fill="#b9aef7"/>
+    <path d="M176 44 L 180 34 L 184 44 L 194 48 L 184 52 L 180 62 L 176 52 L 166 48 Z" fill="#ffd9c7" stroke-width="2"/>
+    <path d="M36 70 L 39 63 L 42 70 L 49 73 L 42 76 L 39 83 L 36 76 L 29 73 Z" fill="#6fe0bf" stroke-width="2"/>
+    <path d="M186 92 L 188 88 L 190 92 L 194 94 L 190 96 L 188 100 L 186 96 L 182 94 Z" fill="#b9aef7" stroke-width="1.6"/>
+  </g>
+</svg>

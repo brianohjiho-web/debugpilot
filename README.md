@@ -8,6 +8,8 @@
 
 Think of it like a spell checker, but for programs. A person always checks the fix before anything changes.
 
+**Website:** https://brianohjiho-web.github.io/debugpilot/
+
 **Jump to:** [How it works](#how-it-works) · [Pictures](#what-it-looks-like) · [Try it](#try-it-on-windows) · [What it can do](#what-it-can-do) · [For developers](#for-developers) · [Limits](#limits)
 
 ---
