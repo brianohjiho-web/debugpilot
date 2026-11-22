@@ -8,7 +8,7 @@
 
 Think of it like a spell checker, but for programs. A person always checks the fix before anything changes.
 
-**Website:** https://brianohjiho-web.github.io/debugpilot/
+**Download it here:** https://brianohjiho-web.github.io/debugpilot/
 
 **Example report (opens in any browser, nothing to install):** https://brianohjiho-web.github.io/debugpilot/report/
 
