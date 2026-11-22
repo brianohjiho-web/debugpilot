@@ -10,7 +10,7 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 **Website:** https://brianohjiho-web.github.io/debugpilot/
 
-**Jump to:** [How it works](#how-it-works) · [Pictures](#what-it-looks-like) · [Try it](#try-it-on-windows) · [What it can do](#what-it-can-do) · [For developers](#for-developers) · [Limits](#limits)
+**Jump to:** [How it works](#how-it-works) · [Pictures](#what-it-looks-like) · [Try it](#try-it-on-windows) · [Chrome](#add-it-to-chrome) · [What it can do](#what-it-can-do) · [For developers](#for-developers) · [Limits](#limits)
 
 ---
 
@@ -53,6 +53,17 @@ Think of it like a spell checker, but for programs. A person always checks the f
 - The built-in example sites are free to scan.
 - To fix your own code, you need an `ANTHROPIC_API_KEY`. Copy `.env.example` to `.env` and paste your key in it.
 - Only scan websites you are allowed to test.
+
+---
+
+## Add it to Chrome
+
+Scan any page you are on with one click. DebugPilot must be running on your computer.
+
+1. Open `chrome://extensions` in Chrome.
+2. Turn on **Developer mode** (top right).
+3. Click **Load unpacked** and pick the `extension` folder.
+4. On any site, click the DebugPilot button and choose **Scan this page**.
 
 ---
 
