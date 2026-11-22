@@ -105,14 +105,6 @@ No install needed on the website. Go to **Scan a site**, paste a link, press **S
 5. **Speed check.** It loads the page like a phone on a slow 4G connection. You see how fast it starts, how big it is, and what is slow. For example: "this image is 1.5 MB, save it as WebP".
 6. **Share.** Press **Copy report** to send it to the site's owner.
 
-You don't own the site, so you get a tested fix to hand over. Their code is not changed.
-
-**Safety rules**
-- It skips buttons that look like they spend money, delete things, or log out.
-- It never sends forms that save data.
-- It stays on one site (3 pages at most).
-- It refuses private network addresses.
-
 ### 3. Scan equipment web pages (read-only)
 Turn on **Equipment mode** to check the web pages inside data center equipment, like a power backup (UPS) page at `192.168.1.50`.
 
