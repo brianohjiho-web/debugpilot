@@ -12,6 +12,8 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 **Example report (opens in any browser, nothing to install):** https://brianohjiho-web.github.io/debugpilot/report/
 
+**Chrome add-on:** scan any page you are on with one click. [See how to add it](#add-it-to-chrome).
+
 ---
 
 ## How it works
