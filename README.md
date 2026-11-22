@@ -1,4 +1,51 @@
+<p align="center">
+  <img src="web/img/cat-search.svg" width="140" alt="DebugPilot cat looking for bugs">
+</p>
+
 # DebugPilot
+
+## In simple words
+
+**DebugPilot is a helper that finds mistakes (bugs) in code and websites, and then fixes them.**
+
+Think of it like a spell checker, but for programs. Here is what it does:
+
+| | |
+|---|---|
+| <img src="web/img/cat-search.svg" width="90"> | **1. It looks.** It reads your code, or opens your website and clicks the buttons like a real person. |
+| <img src="web/img/cat-oops.svg" width="90"> | **2. It finds a crash.** If something breaks, it writes down exactly what you did to make it break. |
+| <img src="web/img/cat-wrench.svg" width="90"> | **3. It makes a fix.** It writes a small change that should solve the problem. |
+| <img src="web/img/cat-fixed.svg" width="90"> | **4. It checks the fix.** It tries the same steps again. If the crash is gone, the fix is marked as tested. |
+| <img src="web/img/cat-yay.svg" width="90"> | **5. You decide.** A person always looks at the fix first. Nothing is changed on its own. |
+
+### What it looks like
+
+**Scan a website.** Type a web address and press the search button.
+
+![Scan page](docs/scan.png)
+
+**Read the report.** It lists each crash, what you did to cause it, why it happened, and the fix.
+
+![Report page](docs/report.png)
+
+**Fix your own code.** Paste code and the helper shows a test that fails, then a fix that passes.
+
+![Debug code page](docs/debugger.png)
+
+### How to try it on Windows
+
+1. Install [Python](https://www.python.org/downloads/) (version 3.10 or newer). Tick **Add python.exe to PATH**.
+2. Download this project and unzip it.
+3. Double-click **`start.bat`**. The first time takes a few minutes.
+4. Your browser opens. Click one of the "Or try one" example links and press search.
+
+You can scan the built-in example sites for free. To fix your own code you need an `ANTHROPIC_API_KEY`. Copy `.env.example` to `.env` and put your key in it.
+
+Only scan websites you are allowed to test.
+
+---
+
+## The longer explanation
 
 An AI agent that finds the bug in your code, **proves it with a test**, writes the fix, **proves the fix works**, and hands it to a human as a draft pull request.
 
