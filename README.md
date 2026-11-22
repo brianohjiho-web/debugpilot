@@ -154,7 +154,7 @@ flowchart LR
     B --> C["Claude AI<br/>(thinks up the fix)"]
     B --> D["Safe box<br/>(tests the code)"]
     D --> E["8 languages:<br/>Python, JavaScript, SQL, C,<br/>C++, Java, Go, R"]
-    D --> F["Result<br/>A tested fix and a report<br/>for a person to check"]
+    E --> F["Result<br/>A tested fix and a report<br/>for a person to check"]
 
     style A fill:#e8e4ff,stroke:#8f7bff,color:#12132a
     style B fill:#ffe0e8,stroke:#ff9bb0,color:#12132a
