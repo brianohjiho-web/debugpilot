@@ -208,4 +208,3 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-Languages whose tools are not installed are skipped. The Docker image has them all.
