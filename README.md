@@ -10,6 +10,8 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 **Website:** https://brianohjiho-web.github.io/debugpilot/
 
+**Example report (opens in any browser, nothing to install):** https://brianohjiho-web.github.io/debugpilot/report/
+
 ## Try it in one click
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/brianohjiho-web/debugpilot?quickstart=1)
