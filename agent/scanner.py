@@ -230,6 +230,10 @@ class Session:
                 if swap and route.request.url in swap:
                     return await route.fulfill(status=200, content_type="application/javascript", body=swap[route.request.url],
                                                headers={"cache-control": "no-store"})
+                # Pictures, video and fonts don't make a page crash, so tries skip them to load much faster.
+                # (The speed check uses its own page and still downloads everything.)
+                if not video and route.request.resource_type in ("image", "media", "font"):
+                    return await route.abort()
                 await self._guard(route)
             await ctx.route("**/*", router)
             page = await ctx.new_page()
@@ -274,9 +278,15 @@ class Session:
                             await page.evaluate("([x, y]) => window.__dpCursor(x, y)", [box["x"] + box["width"] / 2, box["y"] + box["height"] / 2])
                         await page.wait_for_timeout(max(700, talk - 300))
                     if st["do"] == "open":
-                        resp = await page.goto(st["url"], wait_until="load", timeout=20000)
+                        # Wait for the page's code, then give everything else up to 4 s. Big sites keep loading
+                        # extras for a long time, and the scan doesn't need to wait for all of them.
+                        resp = await page.goto(st["url"], wait_until="domcontentloaded", timeout=20000)
                         if idx == 0 and resp is not None and resp.status >= 400:
                             status = resp.status
+                        try:
+                            await page.wait_for_load_state("load", timeout=4000)
+                        except Exception:
+                            pass
                         await page.wait_for_timeout(250)
                         if video:
                             intro = "Here's the site as it is." if voice == "before" else "Now the same steps, with the fix."
@@ -343,7 +353,7 @@ async def measure(s: "Session", url: str) -> dict:
         page.on("requestfinished", lambda r: pending.append(asyncio.ensure_future(done(r))))
         await page.goto(url, wait_until="load", timeout=30000)
         try:
-            await page.wait_for_load_state("networkidle", timeout=10000)
+            await page.wait_for_load_state("networkidle", timeout=3000)
         except Exception:
             pass
         timing = await page.evaluate(PERF_JS)
@@ -599,7 +609,7 @@ async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int =
 
         # Run the tries 6 at a time and record crashes the moment they happen,
         # so the report page can show them while the scan is still going.
-        sem = asyncio.Semaphore(6)
+        sem = asyncio.Semaphore(8)
         done = 0
 
         def record(plan, r):
@@ -635,7 +645,10 @@ async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int =
         await asyncio.gather(*(attempt(p) for p in plans))
 
         # Speed check and fixing run at the same time.
-        report["speed"] = [None] * len(pages)
+        # Only the page you pasted gets a speed check: on a slow-phone connection each check
+        # takes a while, and the main page is the one visitors land on.
+        speed_pages = pages[:1]
+        report["speed"] = [None] * len(speed_pages)
 
         async def speed_one(n, pu):
             try:
@@ -654,7 +667,7 @@ async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int =
             progress(f"Fixing crashes ({fixed} of {len(bugs)}) and checking speed")
 
         progress("Fixing crashes and checking speed" if bugs else "Checking speed")
-        await asyncio.gather(*(speed_one(n, pu) for n, pu in enumerate(pages)), *(fix_one(b) for b in bugs.values()))
+        await asyncio.gather(*(speed_one(n, pu) for n, pu in enumerate(speed_pages)), *(fix_one(b) for b in bugs.values()))
         report["bugs"] = sorted(bugs.values(), key=lambda b: b["id"])
 
         # Replay videos. The "after" clip uses every proven fix together, so one fix's clip
