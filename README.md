@@ -146,11 +146,21 @@ It also notices when the problem is **not** the code (for example, a broken sens
 
 ### How the pieces fit
 
+```mermaid
+flowchart LR
+    A["You<br/>(your browser)"] --> B["DebugPilot app<br/>(runs on your computer)"]
+    B --> C["Claude AI<br/>(thinks up the fix)"]
+    B --> D["Safe box<br/>(tests the code)"]
+    D --> E["8 languages:<br/>Python, JavaScript, SQL, C,<br/>C++, Java, Go, R"]
+
+    style A fill:#e8e4ff,stroke:#8f7bff,color:#12132a
+    style B fill:#ffe0e8,stroke:#ff9bb0,color:#12132a
+    style C fill:#e0f4ff,stroke:#5bb5e8,color:#12132a
+    style D fill:#e0ffe8,stroke:#4cc97a,color:#12132a
+    style E fill:#fff6d9,stroke:#e8b84c,color:#12132a
 ```
-Browser --> app (FastAPI + agent) --> Claude API
-                  |
-                  +--> runner (sandbox) --> runs code in Python, Node, gcc, g++, Java, Go, R, SQLite
-```
+
+In short: you ask in your browser, the app asks Claude for a fix, and the safe box checks that the fix really works.
 
 ### Folders
 
