@@ -224,16 +224,3 @@ pytest -q
 ```
 
 Languages whose tools are not installed are skipped. The Docker image has them all.
-
----
-
-## Limits
-
-- It fixes one file at a time. Tests can't use outside services (like databases or websites).
-- The pull request endpoint trusts the report the browser sends. That is fine for a tool you run yourself. A shared, hosted version should keep reports on the server.
-- The scanner can't get past a login. It only fixes crashes in scripts it can download (not inline scripts or browser extensions).
-- The scanner runs Chromium without its own sandbox inside the container. For a public site, run scans in a separate locked-down container.
-- Autopilot reads the file named in the crash. Minified sites need source maps (not supported yet).
-- Crash intake has a basic rate limit per key. A hosted version should add a login for the dashboard.
-
-**Next ideas:** source maps, server-side crashes (Python/Node logs), fixes across many files, and a Slack message when a fix is ready.
