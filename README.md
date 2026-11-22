@@ -12,16 +12,6 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 **Example report (opens in any browser, nothing to install):** https://brianohjiho-web.github.io/debugpilot/report/
 
-## Try it in one click
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/brianohjiho-web/debugpilot?quickstart=1)
-
-1. Click the button and sign in to GitHub (free accounts get free Codespaces hours each month).
-2. Wait 2–3 minutes the first time while it sets up.
-3. DebugPilot opens in a new tab. Click **Scan a site**, then try one of the example links.
-
-Nothing to download. It runs in your own private copy in the cloud, and you can delete it any time from [github.com/codespaces](https://github.com/codespaces).
-
 ---
 
 ## How it works
