@@ -54,6 +54,29 @@ Think of it like a spell checker, but for programs. A person always checks the f
 - To fix your own code, you need an `ANTHROPIC_API_KEY`. Copy `.env.example` to `.env` and paste your key in it.
 - Only scan websites you are allowed to test.
 
+### What are the files in the download?
+
+You only need to touch **`start.bat`**. The rest is the engine inside.
+
+| File or folder | What it is, in simple words |
+|---|---|
+| `start.bat` | **Double-click this to start.** It sets everything up and opens your browser. |
+| `share.bat` | Optional. Makes a link so a friend can open your copy. |
+| `.env.example` | A blank settings form. Copy it to `.env` and add your AI key to fix your own code. |
+| `requirements.txt` | A shopping list of tools the app needs. `start.bat` installs them for you. |
+| `server.py` | The app itself. It runs on your computer. |
+| `agent/` | The "brain" that finds bugs and writes fixes. |
+| `runner/` | The safe box where code is tested, so it can't harm your computer. |
+| `web/` | The pages you see in your browser. |
+| `extension/` | The Chrome add-on. |
+| `watcher/` | A tiny script for watching your own website for crashes. |
+| `demo-site/`, `demo-booking/`, `demo-power/` | Practice websites with bugs on purpose, so you can try it. |
+| `docs/` | The public website and example report. |
+| `tests/` | Checks that the app itself works. |
+| `Dockerfile.*`, `docker-compose.yml` | For people who use Docker. You can ignore these. |
+
+When you run it, it also makes a `data/` folder to save scan results. It is only on your computer.
+
 ---
 
 ## Add it to Chrome
