@@ -42,19 +42,7 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 ---
 
-## Try it on Windows
-
-1. Install [Python](https://www.python.org/downloads/) (version 3.10 or newer). Tick **Add python.exe to PATH**.
-2. Download this project and unzip it.
-3. Double-click **`start.bat`**. The first time takes a few minutes.
-4. Your browser opens. Click one of the "Or try one" links and press search.
-
-**Good to know**
-- The built-in example sites are free to scan.
-- To fix your own code, you need an `ANTHROPIC_API_KEY`. Copy `.env.example` to `.env` and paste your key in it.
-- Only scan websites you are allowed to test.
-
-### What are the files in the download?
+## What are the files in the download?
 
 You only need to touch **`start.bat`**. The rest is the engine inside.
 
