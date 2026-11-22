@@ -10,8 +10,6 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 **Website:** https://brianohjiho-web.github.io/debugpilot/
 
-**Jump to:** [How it works](#how-it-works) · [Pictures](#what-it-looks-like) · [Try it](#try-it-on-windows) · [Chrome](#add-it-to-chrome) · [What it can do](#what-it-can-do) · [For developers](#for-developers) · [Limits](#limits)
-
 ---
 
 ## How it works
