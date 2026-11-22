@@ -8,6 +8,10 @@
 
 Think of it like a spell checker, but for programs. A person always checks the fix before anything changes.
 
+**Use the real tool (free, in your browser):** [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/brianohjiho-web/debugpilot?quickstart=1)
+
+Sign in to GitHub, wait 2–3 minutes the first time, then click **Scan a site**.
+
 **Download it here:** https://brianohjiho-web.github.io/debugpilot/
 
 **Example report (opens in any browser, nothing to install):** https://brianohjiho-web.github.io/debugpilot/report/
