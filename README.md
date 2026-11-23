@@ -203,10 +203,3 @@ The code being fixed is not trusted. The runner has:
 
 ### No API key?
 The built-in example for each language still works in demo mode. The answer is prepared, but the sandbox still runs and checks it.
-
-### Use it on your own website
-1. Add your site and its GitHub repo with `POST /api/projects`.
-2. Paste the script line it gives you into your pages.
-3. If your site files are in a subfolder (like `public`), set **Site folder in the repo**.
-
-For now, autopilot fixes JavaScript and TypeScript files.
