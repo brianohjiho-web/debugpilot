@@ -125,8 +125,6 @@ Scan the page you are looking at with one click.
 3. Click **Load unpacked** and pick the `extension` folder.
 4. On any site, click the DebugPilot button (or right-click) and choose **Scan this page**.
 
-DebugPilot must be running. The extension talks to `http://localhost:8000`. You can change this in the popup's Settings.
-
 ### 5. Autopilot for your own website
 Add one line to your website:
 
