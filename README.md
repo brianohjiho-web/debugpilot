@@ -200,6 +200,3 @@ The code being fixed is not trusted. The runner has:
 - no extra Linux powers
 - a non-root user
 - a time limit, a CPU limit, and a throwaway folder for each run
-
-### No API key?
-The built-in example for each language still works in demo mode. The answer is prepared, but the sandbox still runs and checks it.
