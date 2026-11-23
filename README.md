@@ -210,14 +210,3 @@ The built-in example for each language still works in demo mode. The answer is p
 3. If your site files are in a subfolder (like `public`), set **Site folder in the repo**.
 
 For now, autopilot fixes JavaScript and TypeScript files.
-
-### Draft pull requests
-Add a `GITHUB_TOKEN` to `.env`. It needs **Contents** and **Pull requests** read/write access on the repos you choose. A form then appears under each verified fix.
-
-### Run the tests
-
-```bash
-pip install -r requirements-dev.txt
-pytest -q
-```
-
