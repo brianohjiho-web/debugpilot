@@ -47,7 +47,7 @@ Paste a website link and press Scan.
 
 You only need to touch **`start.bat`**. The rest is the engine inside.
 
-| File or folder | What it is, in simple words |
+| File or folder | Explanation |
 |---|---|
 | `start.bat` | **Double-click this to start.** It sets everything up and opens your browser. |
 | `share.bat` | Optional. Makes a link so a friend can open your copy. |
