@@ -66,6 +66,14 @@ h2.title{font-size:15px;margin:0 0 10px}
 @media (prefers-reduced-motion:reduce){.steps li.now i{animation:none}}
 .sub2{color:var(--sub);font-size:13px;margin-top:14px}
 
+/* fix the site */
+.fixbox{border:1px solid var(--mint-line);border-radius:10px;padding:18px 20px;margin:0 0 40px}
+.fixbox h2{font-size:16px;margin:0 0 4px} .fixbox p{margin:0 0 12px;color:var(--body)}
+.fixbox .row3{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fixbox input{background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:7px 10px;font:13px var(--mono);min-width:200px}
+.fixbox .opt{padding:12px 0;border-top:1px solid var(--line-2)} .fixbox .opt:first-of-type{border-top:0;padding-top:0}
+.fixbox .opt b{display:block;font-size:13.5px;margin-bottom:6px}
+.fixmsg{font-size:13px;margin-top:8px}
 /* crash cards on the overview */
 .card2{max-width:820px;padding:30px 0 34px;border-top:1px solid var(--line-2)} .card2:first-of-type{border-top:0;padding-top:6px}
 .card2 .ct{margin:6px 0 4px;font-size:18px;line-height:1.4;font-weight:700}
@@ -217,6 +225,7 @@ function render() {
   document.querySelectorAll("[data-t]").forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.t); });
   document.querySelectorAll("[data-c]").forEach(a => a.onclick = e => { e.preventDefault(); go("crashes", +a.dataset.c); });
   document.querySelectorAll("[data-p]").forEach(a => a.onclick = () => { pageIx = +a.dataset.p; render(); });
+  wireFix();
   $("copy").onclick = async () => { try { await navigator.clipboard.writeText(markdown()); $("copy").textContent = "Copied"; } catch (e) { $("copy").textContent = "Couldn't copy"; } };
   $("again").onclick = async () => { const r = await fetch("/api/scan", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({url: R.url, equipment: !!R.equipment_mode, permission: !!R.equipment_mode})}); const j = await r.json(); if (r.ok) location.href = "/report/" + j.id; };
 }
@@ -235,8 +244,9 @@ function overview(proven) {
     <div><span>Things tried</span><b>${R.tries}</b></div>
     <div><span>Main content shows</span><b class="${lcp ? lcp.grade : ""}">${lcp ? fmt(lcp) : "—"}</b></div>
   </div>`;
+  h += fixBox();
   if (n) h += `<div class="sec"><h2>Crashes <small>Where the page breaks, the code behind it, and the fix</small></h2>${R.bugs.map(card).join("")}</div>`;
-  else h += `<div class="sec nothing">${CAT_YAY}<p class="muted" style="margin:0">No crashes in ${R.tries} tries. That's a good sign, but it doesn't prove there are none.</p></div>`;
+  else h += `<div class="sec nothing">${CAT_YAY}<p class="muted" style="margin:0">No crashes in ${R.tries} tries. That's a good sign, but it doesn't prove there are none.${/^\/demo(-booking|-power)?\//.test(new URL(R.url).pathname) ? ` <br>This demo already has its fixes. <button class="b2" type="button" id="bugsBack" style="margin-top:8px">Put the bugs back</button>` : ""}</p></div>`;
   if (sp) h += `<div class="sec"><h2>Speed <small>How fast the page loads for a visitor on a phone (4G)</small></h2>
     <table class="tbl"><tbody>${sp.metrics.map(m => `<tr><td><span class="t" style="font-weight:500">${esc(m.label)}</span><span class="hint"> · ${esc(HELP[m.label] || "")}</span></td><td class="r" style="font-variant-numeric:tabular-nums">${fmt(m)}</td><td class="r" style="width:90px"><span class="st ${m.grade}">${GRADE[m.grade]}</span></td></tr>`).join("")}</tbody></table>
     ${sp.tips.length ? `<p style="margin:12px 0 0;font-size:13px"><a href="#speed" data-t="speed" style="color:var(--peach)">${sp.tips.length} thing${sp.tips.length === 1 ? "" : "s"} slowing it down ›</a></p>` : ""}</div>`;
@@ -257,6 +267,48 @@ function card(b) {
     <div class="pair">${b.window ? `<section class="blk"><h3>The code that breaks</h3>${codeView(b)}</section>` : ""}
     ${fx && fx.old_code ? `<section class="blk"><h3>The fix <small class="hint">red = removed, green = added</small></h3><div class="file">${esc(fileOf(b))}</div><div class="diff">${diff(fx.old_code, fx.new_code)}</div></section>` : ""}</div>
     <a class="morelink" href="#" data-c="${b.id}">Steps, proof and full error ›</a></article>`;
+}
+
+// Ways to fix the real site with the tested fixes.
+function fixBox() {
+  const files = R.fix_files || [];
+  if (!files.length) return "";
+  const dl = files.map(f => `<a class="b2" href="/api/scan/${JOB}/fixed?file=${encodeURIComponent(f.url)}" download>Download ${esc(f.name)}</a>`).join("");
+  if (R.own_demo) return `<div class="fixbox"><h2>Fix the site</h2>
+    <p>This is DebugPilot's own demo site, so it can put the tested fixes into the site for real.</p>
+    <div class="row3"><button class="b2 main" type="button" id="applyAll">Apply ${files.length === 1 ? "the fixes" : "all fixes"} to the site</button>${dl}</div>
+    <div class="fixmsg" id="applyMsg"></div></div>`;
+  const gh = CFG && CFG.github;
+  return `<div class="fixbox"><h2>Fix your site</h2>
+    <p>DebugPilot can't change a live website on its own. Use the tested fixes one of these ways:</p>
+    <div class="opt"><b>1. Download the fixed file</b><div class="row3">${dl}</div>
+      <div class="hint" style="margin-top:6px">Replace the old file on your site with this one. Every tested fix is already in it.</div></div>
+    <div class="opt"><b>2. Send it to GitHub as a draft pull request</b>
+      ${gh ? `<div class="row3"><input id="prRepo" placeholder="owner/repo"><input id="prPath" placeholder="path in repo, like js/${esc(files[0].name)}" value="${esc(files[0].name)}"><button class="b2 main" type="button" id="prGo">Open draft PR</button></div><div class="fixmsg" id="prMsg"></div>`
+        : `<div class="hint">Add a GitHub token in DebugPilot's settings (.env) to turn this on. A person still reviews and merges it.</div>`}</div></div>`;
+}
+let CFG = null;
+fetch("/api/config").then(r => r.json()).then(c => { CFG = c; if (R && tab === "overview") render(); }).catch(() => {});
+function wireFix() {
+  const bb = $("bugsBack"); if (bb) bb.onclick = async () => { await fetch("/api/demo/reset-all", {method: "POST"}); bb.replaceWith(Object.assign(document.createElement("span"), {textContent: "Done. Scan again to see the crashes.", className: "good"})); };
+  const a = $("applyAll"); if (a) a.onclick = async () => {
+    a.disabled = true; a.textContent = "Applying…";
+    const r = await fetch(`/api/scan/${JOB}/apply`, {method: "POST"}); const j = await r.json().catch(() => ({}));
+    if (!r.ok) { $("applyMsg").innerHTML = `<span class="poor">${esc(j.detail || "Couldn't apply the fixes.")}</span>`; a.disabled = false; a.textContent = "Try again"; return; }
+    a.textContent = "Applied";
+    $("applyMsg").innerHTML = `<span class="good">Done. ${esc(j.applied.join(", "))} now has the fixes.</span> <button class="b2" type="button" id="recheck">Scan again to check</button> <button class="b2" type="button" id="undo">Put the bugs back</button>`;
+    $("recheck").onclick = () => $("again").click();
+    $("undo").onclick = async () => { await fetch("/api/demo/reset-all", {method: "POST"}); $("applyMsg").innerHTML = `<span class="muted">The bugs are back. You can apply the fixes again any time.</span>`; a.disabled = false; a.textContent = "Apply the fixes to the site"; };
+  };
+  const g = $("prGo"); if (g) g.onclick = async () => {
+    const repo = $("prRepo").value.trim(), path = $("prPath").value.trim();
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !path) { $("prMsg").innerHTML = `<span class="poor">Enter the repo as owner/name and the file's path.</span>`; return; }
+    g.disabled = true; g.textContent = "Opening…";
+    const r = await fetch(`/api/scan/${JOB}/pr`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({file: R.fix_files[0].url, repo, path})});
+    const j = await r.json().catch(() => ({}));
+    $("prMsg").innerHTML = r.ok ? `<span class="good">Opened:</span> <a href="${esc(j.url)}" target="_blank" rel="noopener" style="color:var(--peach)">${esc(j.url)}</a>` : `<span class="poor">${esc(j.detail || "Couldn't open the pull request.")}</span>`;
+    g.disabled = false; g.textContent = "Open draft PR";
+  };
 }
 
 function crashes() {
@@ -320,7 +372,8 @@ function detail(b) {
   if (b.note) d += `<div class="note">${esc(b.note)}</div>`;
   d += `<section class="blk"><h3>Steps to make it crash</h3><ol>${b.steps_text.map(s => `<li>${esc(s)}</li>`).join("")}</ol></section>`;
   if (b.window) d += `<section class="blk"><h3>The code that breaks</h3>${codeView(b)}<p style="margin-top:10px">${esc(plainError(b))}</p></section>`;
-  if (fx && fx.old_code) d += `<section class="blk"><h3>The change</h3><p>Red lines are removed, green lines are added.</p><div class="diff">${diff(fx.old_code, fx.new_code)}</div></section>`;
+  const ff = (R.fix_files || []).find(f => f.url === b.script);
+  if (fx && fx.old_code) d += `<section class="blk"><h3>The change</h3><p>Red lines are removed, green lines are added.</p><div class="diff">${diff(fx.old_code, fx.new_code)}</div>${ff && b.status === "proven" ? `<p style="margin-top:10px"><a href="/api/scan/${JOB}/fixed?file=${encodeURIComponent(ff.url)}" download style="color:var(--peach)">Download the fixed ${esc(ff.name)}</a></p>` : ""}</section>`;
   if (fx && b.status !== "found") d += `<section class="blk"><h3>Proof</h3><p>DebugPilot ran the same steps twice in the live page.</p>
     <table class="proof"><tr><td>With the site's code</td><td><span class="st poor">Crashed</span></td></tr>
     <tr><td>With the fix swapped in</td><td>${b.status === "proven" ? `<span class="st good">No crash</span>` : `<span class="st ok">Still crashed or broke something else</span>`}</td></tr></table></section>`;

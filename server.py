@@ -339,6 +339,10 @@ def _scan_job(job_id: str, url: str, allow_private: bool, equipment: bool = Fals
             rep = _run_async(scanner.scan(url, llm=make_llm(), allow_private=allow_private,
                                            progress=lambda m: job.__setitem__("progress", m), on_found=found,
                                            equipment=equipment))
+            # Fixed code files stay on the server; the report only lists them.
+            job["fixed_files"] = rep.pop("fixed_files", {}) or {}
+            rep["fix_files"] = [{"url": u, "name": (urlparse(u).path.rsplit("/", 1)[-1] or "script.js")} for u in job["fixed_files"]]
+            rep["own_demo"] = bool(job["fixed_files"]) and all(_demo_file(url, u) for u in job["fixed_files"])
             job["report"] = rep
             job["status"] = "done"
             _save_job(job)
@@ -427,7 +431,103 @@ def scan_status(job_id: str):
     job = SCANS.get(job_id) or _load_job(job_id)
     if not job:
         raise HTTPException(404, "No such scan")
+    return {k: v for k, v in job.items() if k != "fixed_files"}
+
+
+# ---- Fixing the site: download the fixed file, apply it (DebugPilot's own demo sites), or send it to GitHub ----
+DEMO_DIRS = {"demo-booking": HERE / "demo-booking", "demo-power": HERE / "demo-power", "demo": DEMO_DIR}
+
+
+def _demo_file(page_url: str, file_url: str):
+    """The local file behind one of DebugPilot's own demo sites, or None for any other site."""
+    pu, fu = urlparse(page_url), urlparse(file_url)
+    if pu.netloc != fu.netloc:
+        return None
+    parts = fu.path.strip("/").split("/")
+    if len(parts) != 2 or parts[0] not in DEMO_DIRS or not parts[0] == pu.path.strip("/").split("/")[0]:
+        return None
+    if not re.fullmatch(r"[\w.-]+\.js", parts[1]):
+        return None
+    f = DEMO_DIRS[parts[0]] / parts[1]
+    return f if f.is_file() else None
+
+
+def _done_job(job_id: str) -> dict:
+    job = SCANS.get(job_id)
+    if not job or job.get("status") != "done":
+        raise HTTPException(404, "That report isn't available anymore. Scan again.")
     return job
+
+
+@app.get("/api/scan/{job_id}/fixed")
+def download_fixed(job_id: str, file: str):
+    job = _done_job(job_id)
+    f = (job.get("fixed_files") or {}).get(file)
+    if not f:
+        raise HTTPException(404, "No fixed version of that file.")
+    name = urlparse(file).path.rsplit("/", 1)[-1] or "script.js"
+    return Response(f["fixed"], media_type="application/javascript",
+                    headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+
+@app.post("/api/scan/{job_id}/apply")
+def apply_fixes(job_id: str):
+    """Writes the tested fixes into DebugPilot's own demo site, so a new scan shows them fixed."""
+    job = _done_job(job_id)
+    page = job["report"]["url"]
+    done = []
+    for u, f in (job.get("fixed_files") or {}).items():
+        path = _demo_file(page, u)
+        if not path:
+            raise HTTPException(400, "DebugPilot can only change its own demo sites. For your own site, download the fixed file or send it to GitHub.")
+        current = path.read_text()
+        merged = autofix.merge_fix(f["original"], f["fixed"], current)
+        if merged is None:
+            raise HTTPException(409, f"{path.name} changed since the scan. Scan again, then apply.")
+        path.write_text(merged)
+        done.append(path.name)
+    if not done:
+        raise HTTPException(400, "There are no tested fixes to apply.")
+    return {"applied": done}
+
+
+@app.post("/api/demo/reset-all")
+def reset_all_demos():
+    """Puts the bugs back in every demo site."""
+    for d in DEMO_DIRS.values():
+        orig = d / "_original"
+        if orig.is_dir():
+            for f in orig.iterdir():
+                if f.is_file():
+                    shutil.copyfile(f, d / f.name)
+    return {"ok": True}
+
+
+class FixPR(BaseModel):
+    file: str
+    repo: str
+    path: str
+    base: str = ""
+
+
+@app.post("/api/scan/{job_id}/pr")
+def fixes_to_github(job_id: str, req: FixPR):
+    token = os.environ.get("GITHUB_TOKEN")
+    if not token:
+        raise HTTPException(400, "Add a GITHUB_TOKEN in DebugPilot's settings (.env) to send fixes to GitHub.")
+    job = _done_job(job_id)
+    f = (job.get("fixed_files") or {}).get(req.file)
+    if not f:
+        raise HTTPException(404, "No fixed version of that file.")
+    proven = [b for b in job["report"]["bugs"] if b.get("status") == "proven" and b.get("script") == req.file]
+    title = "Fix " + (f"{len(proven)} crashes" if len(proven) > 1 else "a crash") + f" found by DebugPilot in {req.path.rsplit('/', 1)[-1]}"
+    body = "DebugPilot found these crashes on " + job["report"]["url"] + " and tested each fix in the live page:\n\n" + "\n".join(
+        f"- {(b.get('fix') or {}).get('summary') or b['message']}" for b in proven) + "\n\nReview before merging."
+    try:
+        url = open_pull_request(token, req.repo.strip(), req.path, f["fixed"], title, body, req.base or None)
+    except GitHubError as e:
+        raise HTTPException(400, str(e))
+    return {"url": url}
 
 
 @app.get("/api/scan/{job_id}/video/{name}")

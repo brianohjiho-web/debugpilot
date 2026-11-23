@@ -670,6 +670,16 @@ async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int =
         await asyncio.gather(*(speed_one(n, pu) for n, pu in enumerate(speed_pages)), *(fix_one(b) for b in bugs.values()))
         report["bugs"] = sorted(bugs.values(), key=lambda b: b["id"])
 
+        # Each code file with every proven fix applied, so the site owner can download it,
+        # apply it, or send it to GitHub. (The server keeps these out of the report it shows.)
+        fixed_files: dict[str, str] = {}
+        for b in report["bugs"]:
+            if b.get("status") == "proven" and b.get("script") in scripts:
+                cur = fixed_files.get(b["script"], scripts[b["script"]])
+                if cur.count(b["fix"]["old_code"]) == 1:
+                    fixed_files[b["script"]] = cur.replace(b["fix"]["old_code"], b["fix"]["new_code"], 1)
+        report["fixed_files"] = {u: {"original": scripts[u], "fixed": t} for u, t in fixed_files.items()}
+
         # Replay videos. The "after" clip uses every proven fix together, so one fix's clip
         # doesn't stumble into a different, separate bug further along the same steps.
         if video_dir:

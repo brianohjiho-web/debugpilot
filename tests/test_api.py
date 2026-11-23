@@ -49,3 +49,12 @@ def test_share_link_visitors_cannot_scan_equipment():
     assert r.status_code == 400 and "own computer" in r.json()["detail"]
     r = c.post("/api/scan", json=body, headers={"host": "abc.trycloudflare.com"})
     assert r.status_code == 400 and "own computer" in r.json()["detail"]
+
+
+def test_apply_fixes_only_touches_demo_files(tmp_path):
+    import server
+    page = "http://127.0.0.1:8000/demo-booking/"
+    assert server._demo_file(page, "http://127.0.0.1:8000/demo-booking/booking.js").name == "booking.js"
+    assert server._demo_file(page, "http://127.0.0.1:8000/demo-booking/../server.py") is None
+    assert server._demo_file(page, "http://evil.example/demo-booking/booking.js") is None
+    assert server._demo_file("https://shop.example/", "https://shop.example/app.js") is None

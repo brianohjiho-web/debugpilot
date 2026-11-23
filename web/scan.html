@@ -19,10 +19,6 @@ form{display:flex;justify-content:center;gap:10px}
 .search input{border:0;background:none;color:var(--text);font-size:15px;outline:none;padding:0}
 .search input::placeholder{color:var(--dim)}
 .go{width:62px;height:62px;border-radius:50%;border:0;background:var(--grad);display:grid;place-items:center;box-shadow:0 12px 26px -12px rgba(217,133,183,.8)}
-.promo{position:absolute;left:20px;top:28px;width:220px;text-align:left;padding:16px}
-.promo h3{margin:8px 0 4px;font-size:15px} .promo p{margin:0;color:var(--sub);font-size:12px;line-height:1.5}
-.promo svg{display:block;margin:12px auto}
-@media (max-width:1200px){.promo{display:none}}
 .go:hover{filter:brightness(1.08)} .go:disabled{opacity:.6;cursor:progress}
 .try{margin-top:18px;color:var(--sub);font-size:13px}
 .equip{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;font-size:13px}
@@ -36,9 +32,16 @@ form{display:flex;justify-content:center;gap:10px}
 .equipbox{max-width:620px;margin:12px auto 0;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 18px;font-size:13px;color:var(--sub)}
 .equipbox ul{margin:0 0 10px;padding-left:18px} .equipbox li{margin:3px 0}
 .perm{display:flex;gap:8px;align-items:center;color:var(--text);font-weight:600;cursor:pointer}
-.chips{display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap}
-.chip{border:1px solid var(--line-2);background:var(--panel);border-radius:18px;padding:6px 14px;font-size:13px;font-family:var(--mono)}
-.chip:hover{background:var(--panel-3)}
+.exs{max-width:720px;margin:30px auto 0;text-align:left}
+.exs h3{font-size:13px;font-weight:600;color:var(--sub);margin:0 0 10px}
+.exgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ex{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;text-align:left;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;padding:12px 14px}
+.ex:hover{border-color:var(--line);background:var(--panel-2)}
+.ex b{font-size:14px;font-weight:600}
+.ex .d{grid-column:1;font-size:12.5px;color:var(--sub)}
+.ex .u{grid-column:1;font-family:var(--mono);font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex .n{grid-column:2;grid-row:1/4;font-size:12px;color:var(--coral);white-space:nowrap}
+@media (max-width:640px){.exgrid{grid-template-columns:1fr}}
 .err{color:var(--coral);margin-top:16px;min-height:22px}
 .how{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:900px;margin:70px auto 0;text-align:left}
 .how div{padding:16px 18px}
@@ -57,20 +60,6 @@ form{display:flex;justify-content:center;gap:10px}
 <nav class="subnav"><a href="/scan" class="on">Home</a><a href="/">Debug code<span class="new" style="margin-left:6px">Paste code</span></a></nav>
 
 <main class="home">
-  <aside class="promo box">
-    <span class="new">New</span>
-    <h3>Reports in plain words</h3>
-    <p>Every crash is explained without tech talk: what happens, why, and what the fix changes.</p>
-    <svg width="160" height="68" viewBox="0 0 160 68" aria-hidden="true">
-      <rect x="2" y="6" width="156" height="56" rx="8" fill="#191b37" stroke="#383b6b"/>
-      <rect x="14" y="18" width="40" height="6" rx="3" fill="#ffb59c"/>
-      <rect x="62" y="18" width="84" height="6" rx="3" fill="#a9a7cf" opacity=".6"/>
-      <rect x="14" y="32" width="40" height="6" rx="3" fill="#ffb59c"/>
-      <rect x="62" y="32" width="70" height="6" rx="3" fill="#a9a7cf" opacity=".6"/>
-      <rect x="14" y="46" width="40" height="6" rx="3" fill="#ffb59c"/>
-      <rect x="62" y="46" width="78" height="6" rx="3" fill="#6fe0bf" opacity=".8"/>
-    </svg>
-  </aside>
   <svg xmlns="http://www.w3.org/2000/svg" class="mascot" width="132" height="126" viewBox="0 0 220 210" role="img" aria-label="DebugPilot's pilot cat holding a magnifying glass">
   <defs>
     <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">
@@ -141,12 +130,14 @@ form{display:flex;justify-content:center;gap:10px}
     <label class="perm"><input type="checkbox" id="perm"> I have permission to test this equipment.</label>
   </div>
   <div class="err" id="err" role="alert"></div>
-  <div class="try">Or try one:</div>
-  <div class="chips">
-    <button class="chip" type="button" data-try="/demo/"></button>
-    <button class="chip" type="button" data-try="/demo-booking/"></button>
-    <button class="chip" type="button" data-try="/demo-power/"></button>
-    <button class="chip" type="button" data-try="https://the-internet.herokuapp.com/javascript_error"></button>
+  <div class="exs">
+    <h3>Or try an example</h3>
+    <div class="exgrid">
+      <button class="ex" type="button" data-try="/demo-booking/"><b>Hotel booking</b><span class="d">Prices, name badges, spa times</span><span class="u"></span><span class="n">3 crashes</span></button>
+      <button class="ex" type="button" data-try="/demo-power/"><b>Data center power panel</b><span class="d">Rack loads, alarms, unit converter</span><span class="u"></span><span class="n">3 crashes</span></button>
+      <button class="ex" type="button" data-try="/demo/"><b>Little shop</b><span class="d">Coupons, cart, shipping estimate</span><span class="u"></span><span class="n">3 crashes</span></button>
+      <button class="ex" type="button" data-try="https://the-internet.herokuapp.com/javascript_error"><b>Real public test site</b><span class="d">A page that breaks as it opens</span><span class="u"></span><span class="n">1 crash</span></button>
+    </div>
   </div>
 
   <section class="how" id="how">
@@ -182,7 +173,7 @@ $("scanForm").addEventListener("submit", e => { e.preventDefault(); start($("url
 // Each example button shows the actual link it scans.
 document.querySelectorAll("[data-try]").forEach(b => {
   const u = b.dataset.try.startsWith("/") ? location.origin + b.dataset.try : b.dataset.try;
-  b.textContent = u.replace(/^https?:\/\//, "");
+  b.querySelector(".u").textContent = b.dataset.try.startsWith("/") ? b.dataset.try : u.replace(/^https?:\/\//, "");
   b.title = "Scan " + u;
 });
 document.querySelectorAll("[data-try]").forEach(b => b.onclick = e => { e.preventDefault();
