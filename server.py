@@ -334,7 +334,8 @@ def _scan_job(job_id: str, url: str, allow_private: bool, equipment: bool = Fals
         try:
             def found(bugs):   # crashes so far, shown on the report page while the scan runs
                 job["found"] = [{"id": b["id"], "type": b["type"], "message": b["message"][:200],
-                                 "where": f"{(b.get('frame') or {}).get('func') or '?'}() · {((b.get('frame') or {}).get('url') or '').split('/')[-1]}:{(b.get('frame') or {}).get('line') or '?'}"}
+                                 "where": f"{(b.get('frame') or {}).get('func') or '?'}() · {((b.get('frame') or {}).get('url') or '').split('/')[-1]}:{(b.get('frame') or {}).get('line') or '?'}",
+                                 "status": b.get("status") or "found"}
                                 for b in bugs]
             rep = _run_async(scanner.scan(url, llm=make_llm(), allow_private=allow_private,
                                            progress=lambda m: job.__setitem__("progress", m), on_found=found,

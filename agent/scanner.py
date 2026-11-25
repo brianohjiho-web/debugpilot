@@ -181,11 +181,20 @@ class Session:
         self.blocked: list[str] = []
         self._host_ok: dict[str, bool] = {}
 
+    # Present a normal, up-to-date Chrome so sites that only block obvious bots still let the scan in.
+    # This does not defeat real bot protection, and it is only meant for your own and other friendly sites.
+    BROWSER_PROFILE = {
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "locale": "en-US",
+        "extra_http_headers": {"Accept-Language": "en-US,en;q=0.9"},
+    }
+
     async def __aenter__(self):
         from playwright.async_api import async_playwright
         self._pw = await async_playwright().start()
         exe = os.environ.get("DEBUGPILOT_CHROME") or None
-        self.browser = await self._pw.chromium.launch(executable_path=exe, args=["--no-sandbox"])
+        self.browser = await self._pw.chromium.launch(executable_path=exe,
+            args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
         return self
 
     async def __aexit__(self, *a):
@@ -215,7 +224,7 @@ class Session:
         """Do the steps on a fresh page. Returns crashes, console errors and failed requests.
         `swap` replaces a script URL with different source (used to test a fix in the live page).
         `video` saves a replay of the steps to that path (.webm); `voice` ("before"/"after") adds a voice-over."""
-        opts = {"viewport": {"width": 1280, "height": 720 if video else 900}}
+        opts = {"viewport": {"width": 1280, "height": 720 if video else 900}, **self.BROWSER_PROFILE}
         if video:
             import tempfile
             vdir = tempfile.mkdtemp(prefix="dpvid")
@@ -325,7 +334,7 @@ class Session:
 
 async def measure(s: "Session", url: str) -> dict:
     """Load the page once with an empty cache and time everything it downloads."""
-    ctx = await s.browser.new_context(viewport={"width": 1280, "height": 900})
+    ctx = await s.browser.new_context(viewport={"width": 1280, "height": 900}, **s.BROWSER_PROFILE)
     reqs = []
     try:
         await ctx.route("**/*", s._guard)
@@ -549,7 +558,7 @@ def suggest_fix(bug: dict, src: str, llm, retry_note: str = "") -> dict | None:
     return fix
 
 
-async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int = 80, max_pages: int = 5,
+async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int = 48, max_pages: int = 5,
                progress=lambda msg: None, video_dir: str | None = None,
                on_found=lambda bugs: None, equipment: bool = False) -> dict:
     """equipment=True: read-only scan for device web pages (UPS, PDU, cooling, switchgear).
@@ -573,13 +582,15 @@ async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int =
             raise ScanBlocked(f"The page didn't load: {first['load_error']}")
         if first.get("status"):
             code = first["status"]
-            what = {404: "not found", 401: "asks for a login", 403: "blocked", 500: "a server error", 502: "a server error", 503: "unavailable"}.get(code, "an error")
+            if code in (401, 403, 429):
+                raise ScanBlocked(f"This website blocked the scan (error {code}). Big sites like Google or Amazon, and sites behind a login or a bot-blocker, refuse automated browsers. Try your own site, a smaller site, or one of the examples on the home page.")
+            what = {404: "not found", 500: "a server error", 502: "a server error", 503: "unavailable"}.get(code, "an error")
             raise ScanBlocked(f"That page didn't load: the website answered with error {code} ({what}). Check the link and try again.")
         host = urlparse(first.get("page") or url).netloc
         report["console"] += first["console"]
         report["failed"] += first["failed"]
 
-        explore_ctx = await s.browser.new_context()
+        explore_ctx = await s.browser.new_context(**s.BROWSER_PROFILE)
         await explore_ctx.route("**/*", s._guard)
         ep = await explore_ctx.new_page()
         found_by_page = {}
@@ -609,7 +620,7 @@ async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int =
 
         # Run the tries 6 at a time and record crashes the moment they happen,
         # so the report page can show them while the scan is still going.
-        sem = asyncio.Semaphore(8)
+        sem = asyncio.Semaphore(12)
         done = 0
 
         def record(plan, r):
@@ -665,6 +676,7 @@ async def scan(url: str, llm=None, allow_private: bool = False, max_tries: int =
                 await _fix_and_prove(s, bug, scripts, llm, others=[b for b in bugs.values() if b is not bug])
             fixed += 1
             progress(f"Fixing crashes ({fixed} of {len(bugs)}) and checking speed")
+            on_found(list(bugs.values()))   # let the report page show this fix the moment it's proven
 
         progress("Fixing crashes and checking speed" if bugs else "Checking speed")
         await asyncio.gather(*(speed_one(n, pu) for n, pu in enumerate(speed_pages)), *(fix_one(b) for b in bugs.values()))
@@ -739,7 +751,10 @@ async def _fix_and_prove(s: Session, bug: dict, scripts: dict, llm, others: list
     bug["status"] = "found"
     src = scripts.get(script_url or "")
     if not src:
-        bug["note"] = "The crash happened in code I couldn't download (an inline or browser script), so there's no fix to test."
+        if "network" in (bug.get("type", "") + bug.get("message", "")).lower() or "fetch" in bug.get("message", "").lower():
+            bug["note"] = "This is a failed network request, not a bug in a line of code, so there's no code to show or fix. On a site that needs a login or blocks scanners, it usually means the page refused the visit."
+        else:
+            bug["note"] = "The crash happened in code I couldn't download (an inline or browser script), so there's no fix to test."
         return
     bug["window"], bug["window_start"] = _code_window(src, f.get("line") or 1, f.get("col") or 1, around=6)
 

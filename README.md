@@ -8,9 +8,8 @@
 
 Think of it like a spell checker, but for programs. A person always checks the fix before anything changes.
 
-**Use it now:** [https://separation-neighbor-accommodate-truck.trycloudflare.com/scan](https://separation-neighbor-accommodate-truck.trycloudflare.com/scan)
-
-Paste a website link and press Scan.
+**Website:** [brianohjiho-web.github.io/debugpilot](https://brianohjiho-web.github.io/debugpilot/)  
+**Example report (opens in any browser, nothing to install):** [see it here](https://brianohjiho-web.github.io/debugpilot/report/)
 **Chrome add-on:** scan any page you are on with one click. [See how to add it](#add-it-to-chrome).
 
 ---

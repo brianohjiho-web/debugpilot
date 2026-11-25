@@ -170,8 +170,8 @@ function loading(j) {
   $("app").innerHTML = `<a class="back" href="/scan">← New scan</a><div class="box loading">${CAT_SEARCH}<h2>Scanning ${esc(j.url)}</h2><div class="muted">This takes about a minute. You can leave this page open.</div>
     <ul class="steps">${STAGES.map((s, i) => `<li class="${i < at ? "done" : i === at ? "now" : ""}"><i>${i < at ? "✓" : ""}</i>${s[0]}</li>`).join("")}</ul>
     <div class="sub2">${esc(p)}</div></div>
-    ${(j.found || []).length ? `<h2 class="title" style="max-width:560px;margin:0 auto 10px">Found so far <span class="muted" style="font-weight:400">(fixes come next)</span></h2>
-      <div style="max-width:560px;margin:0 auto"><table class="tbl">${j.found.map(f => `<tr><td class="n">${f.id}</td><td><div class="t">${esc(f.message)}</div><div class="w">${esc(f.where)}</div></td></tr>`).join("")}</table></div>` : ""}`;
+    ${(j.found || []).length ? `<h2 class="title" style="max-width:560px;margin:0 auto 10px">Found so far <span class="muted" style="font-weight:400">(updates live as each fix is proven)</span></h2>
+      <div style="max-width:560px;margin:0 auto"><table class="tbl">${j.found.map(f => `<tr><td class="n">${f.id}</td><td><div class="t">${esc(f.message)}</div><div class="w">${esc(f.where)}</div></td><td class="r">${f.status === "proven" ? '<span class="st good">Fix tested</span>' : f.status === "unproven" ? '<span class="st ok">Fixing…</span>' : '<span class="st poor">Found</span>'}</td></tr>`).join("")}</table></div>` : ""}`;
 }
 async function poll() {
   let j;
@@ -333,7 +333,7 @@ function plainError(b) {
   if ((x = m.match(/([\w$.]+) is not a function/))) return `The code tried to run “${x[1]}” as an action, but it isn't one.`;
   if (/SyntaxError|Unexpected token|Unexpected end/.test(b.type + m)) return "There's a typo in the code, so the browser couldn't read it at all.";
   if (/Maximum call stack/.test(m)) return "The code got stuck calling itself over and over until the browser gave up.";
-  if (/fetch|NetworkError|Load failed/i.test(m)) return "The page asked a server for data and didn't get an answer.";
+  if (/fetch|NetworkError|Load failed/i.test(b.type + m)) return "The page asked a server for data and didn't get an answer. On a site that needs a login (or one that blocks scanners), this is usually the page refusing the visit, not a real bug in the code.";
   if (/JSON/.test(m)) return "The page expected data in one format and got something else.";
   return "The code ran into a situation it didn't expect and stopped.";
 }

@@ -252,7 +252,7 @@ button.primary,.btn.primary,#go,#run{background:linear-gradient(135deg,#8a77f5,#
   <nav class="dp-tabs"><a href="/scan">Scan a site</a><a href="/" aria-current="page">Debug code</a></nav>
   <div class="dp-me"><b>BO</b>Brian Oh</div>
 </header>
-<nav class="subnav"><a href="/scan">Home</a><a href="/" class="on">Debug code</a><a href="#lang">Try an example<span class="new">New</span></a></nav>
+<nav class="subnav"><a href="/scan">Home</a><a href="/" class="on">Debug code</a></nav>
 <div class="wrap">
   <div class="dp-head dp-hero"><svg xmlns="http://www.w3.org/2000/svg" width="130" height="124" style="display:block;margin:-20px auto 4px" viewBox="0 0 220 210" role="img" aria-label="DebugPilot's cat at a laptop">
   <defs>
@@ -304,15 +304,11 @@ button.primary,.btn.primary,#go,#run{background:linear-gradient(135deg,#8a77f5,#
     <path d="M52 176 C 46 170, 50 160, 60 162 C 68 164, 68 176, 62 180 Z" fill="#b9aef7"/>
     <path d="M160 176 C 166 170, 162 160, 152 162 C 144 164, 144 176, 150 180 Z" fill="#b9aef7"/>
   </g>
-</svg><h1>Paste a bug. <span style="background:linear-gradient(90deg,#9d8cff,#e98aa8 60%,#ffb59c);-webkit-background-clip:text;background-clip:text;color:transparent">Get a tested fix.</span></h1><p>DebugPilot finds the bug, writes a test that fails on your code, fixes it, and shows the test passing.</p>
-  <div class="dp-how" style="--n:3;margin-bottom:18px!important"><div><b><span>1</span>Finds the cause</b>Reads your code and the error.</div><div><b><span>2</span>Writes a test</b>The test fails on your code.</div><div><b><span>3</span>Fixes &amp; proves it</b>The same test passes on the fix.</div></div><div class="meta">
-            <span>Claude <span class="mono" id="cfgClaude">…</span></span>
-      <span>Tests run in <span class="mono" id="cfgSandbox">…</span></span>
-      <span>GitHub PRs <span class="mono" id="cfgGh">…</span></span>
-    </div></div>
+</svg><h1>Paste a bug. <span style="background:linear-gradient(90deg,#9d8cff,#e98aa8 60%,#ffb59c);-webkit-background-clip:text;background-clip:text;color:transparent">Get a tested fix.</span></h1><p>No website needed here — just paste your own code below. DebugPilot writes a test that fails on it, fixes it, and shows the test passing. (To scan a live website instead, use <a href="/scan" style="color:var(--peach)">Scan a site</a>.)</p>
+  <div class="dp-how" style="--n:3;margin-bottom:18px!important"><div><b><span>1</span>Finds the cause</b>Reads your code and the error.</div><div><b><span>2</span>Writes a test</b>The test fails on your code.</div><div><b><span>3</span>Fixes &amp; proves it</b>The same test passes on the fix.</div></div></div>
 
   <section class="panel">
-    <div class="ph"><h2>Debug a file</h2><span class="note">Every fix is run against a test before you see it</span></div>
+    <div class="ph"><h2>Paste your code</h2><span class="note">Every fix is run against a test before you see it</span></div>
     <div class="grid">
       <div class="col">
         <label for="lang">Language<select id="lang"></select></label>
@@ -414,9 +410,6 @@ function loadEx(){ const ex=CFG.examples[$("lang").value]; if(ex){ $("src").valu
 (async()=>{
   CFG=await (await fetch("/api/config")).json();
   $("lang").innerHTML=Object.entries(CFG.languages).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
-  $("cfgClaude").textContent=CFG.claude?"connected":"not set (examples only)";
-  $("cfgSandbox").textContent=CFG.sandbox;
-  $("cfgGh").textContent=CFG.github?"on":"off";
   loadEx();
   $("lang").onchange=()=>{ const cur=$("src").value.trim(); if(!cur||Object.values(CFG.examples).some(e=>e.source.trim()===cur)) loadEx(); };
   $("ex").onclick=loadEx; $("go").onclick=go;
