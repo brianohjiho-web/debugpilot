@@ -187,3 +187,19 @@ You ask in your browser, the app asks Claude for a fix, and the safe box checks 
 | Java | A `TestMain` class that exits 1 on fail |
 | Go | Normal `go test` functions |
 | R | `test_...` functions using `stopifnot()` |
+
+---
+
+## Built with
+
+**Core:** Python, Anthropic Claude API, FastAPI, Uvicorn, Pydantic, httpx
+
+**Browser automation:** Playwright (headless Chrome)
+
+**Frontend:** JavaScript, HTML, CSS, Chrome Extension (Manifest V3)
+
+**Languages it can debug:** Python, JavaScript, SQL, C, C++, Java, Go, R
+
+**Testing:** pytest
+
+**Deployment:** Docker, GitHub Actions, Render
