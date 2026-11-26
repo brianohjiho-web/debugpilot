@@ -85,8 +85,7 @@ Only scan websites you are allowed to test.
 3. Start it:
    - **Windows:** double-click `start.bat`.
    - **Mac:** open Terminal, type `bash ` (with a space), drag `start.command` into the window and press Enter.
-4. The first time takes a few minutes. Your browser opens. Keep the window open while you use it.
-5. To fix your own code, copy `.env.example` to `.env` and add your Claude API key.
+4. The first time takes a few minutes. Your browser opens. Keep the window open while you use it.
 
 ### What is in the download?
 
