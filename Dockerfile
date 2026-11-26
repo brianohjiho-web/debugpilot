@@ -17,7 +17,7 @@ COPY demo-site ./demo-site
 COPY demo-booking ./demo-booking
 COPY demo-power ./demo-power
 # Hugging Face runs the container as user 1000.
-RUN useradd -m -u 1000 app && mkdir -p /data && chown -R 1000 /data /app/data /app/demo-site 2>/dev/null || true
+RUN useradd -m -u 1000 app && mkdir -p /data /app/data && chown -R 1000 /data /app
 USER 1000
 EXPOSE 7860
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "7860", "--proxy-headers", "--forwarded-allow-ips", "*"]
