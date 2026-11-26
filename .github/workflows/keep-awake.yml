@@ -1,0 +1,10 @@
+name: Keep site awake
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS -m 60 https://debugpilot-x4kn.onrender.com/scan -o /dev/null
