@@ -8,10 +8,14 @@
 
 Think of it like a spell checker, but for programs. A person always checks the fix before anything changes.
 
-**Live app (free, nothing to install):** [debugpilot-x4kn.onrender.com](https://debugpilot-x4kn.onrender.com/scan)  
-**Website:** [brianohjiho-web.github.io/debugpilot](https://brianohjiho-web.github.io/debugpilot/)  
-**Example report (opens in any browser, nothing to install):** [see it here](https://brianohjiho-web.github.io/debugpilot/report/)
-**Chrome add-on:** scan any page you are on with one click. [See how to add it](#add-it-to-chrome).
+## Start here
+
+| I want to... | Go here |
+|---|---|
+| **Use the tool now** (free, nothing to install) | [Open the live app](https://debugpilot-x4kn.onrender.com/scan) |
+| **See an example result** (nothing to install) | [Example report](https://brianohjiho-web.github.io/debugpilot/report/) |
+| **Scan any page with one click** | [Chrome add-on](#add-it-to-chrome) |
+| **Read the overview** | [Website](https://brianohjiho-web.github.io/debugpilot/) |
 
 ---
 
