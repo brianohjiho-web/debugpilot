@@ -6,27 +6,34 @@
 
 **DebugPilot finds mistakes (bugs) and crashes in code and websites, shows exactly how to make them happen again, fixes them, and checks that the fix really works.**
 
-## Start here
+A person always checks a fix before anything changes.
 
-| I want to... | Go here |
+| | |
 |---|---|
-| **Use the tool now** (free, nothing to install) | [Open the live app](https://debugpilot-x4kn.onrender.com/scan) |
-| **See an example result** (nothing to install) | [Example report](https://brianohjiho-web.github.io/debugpilot/report/) |
-| **Scan any page with one click** | [Chrome add-on](#add-it-to-chrome) |
-
----
-
-## Use the full version
+| **Try it now** (free, nothing to install) | [Open the live app](https://debugpilot-x4kn.onrender.com/scan) |
+| **See an example result** | [Example report](https://brianohjiho-web.github.io/debugpilot/report/) |
+| **Scan any page with one click** | [Chrome add-on](#chrome-add-on) |
+| **Get the full version** | [Download for Windows or Mac](https://github.com/brianohjiho-web/debugpilot/archive/refs/heads/main.zip) |
 
 > [!IMPORTANT]
-> **To use the full version, download all the files** and run them on your own computer.
-> The live app online only does part of the job.
+> **To use the full version, download all the files** and run them on your own computer. The live app online only does part of the job.
 >
 > **Downloading is also faster.** The live app runs on a small free server, so it is slow and takes about a minute to wake up the first time.
->
-> **[Download for Windows or Mac](https://github.com/brianohjiho-web/debugpilot/archive/refs/heads/main.zip)**
 
 ---
+
+## Contents
+
+1. [How it works](#how-it-works)
+2. [What it looks like](#what-it-looks-like)
+3. [Live app vs full version](#live-app-vs-full-version)
+4. [Install the full version](#install-the-full-version)
+5. [Chrome add-on](#chrome-add-on)
+6. [What it can do](#what-it-can-do)
+7. [For developers](#for-developers)
+
+---
+
 ## How it works
 
 | | Step |
@@ -39,18 +46,6 @@
 
 ---
 
-## How to use it (the live app)
-
-1. **Scan a website.** Open the [live app](https://debugpilot-x4kn.onrender.com/scan), type a full address like `https://example.com`, press scan and wait about a minute. The report shows each crash, why it happened and a fix.
-2. **Use it on any page.** Add the Chrome extension (see below), then click it on any site.
-
-**Good to know**
-- The free server sleeps when nobody uses it, so the first visit can take a minute.
-- Each visitor can run about 10 scans an hour.
-- On the public site, Debug code only runs the built-in example. Pasting your own code is switched off for safety. To fix your own code, run DebugPilot on your computer with `start.bat`.
-- Only scan websites you are allowed to test. A person should always read a fix before using it.
-
----
 ## What it looks like
 
 **Scan a website.** Type a web address and press the search button.
@@ -67,70 +62,99 @@
 
 ---
 
-## What are the files in the download?
+## Live app vs full version
 
-You only need to touch **`start.bat`**. The rest is the engine inside.
+| | Live app | Full version (download) |
+|---|---|---|
+| Install needed | None | Yes, about 5 minutes |
+| Scan a website | Yes (about 10 scans an hour) | Yes, faster, no limit |
+| Fix your own pasted code | No, built-in example only | Yes, 8 languages |
+| Equipment pages and autopilot | No | Yes |
+| Speed | Slow, sleeps when idle | Fast |
 
-| File or folder | Explanation |
+**How to use the live app:** open it, type a full address like `https://example.com`, press scan and wait about a minute. The report shows each crash, why it happened and a fix.
+
+Only scan websites you are allowed to test.
+
+---
+
+## Install the full version
+
+1. Install [Python](https://www.python.org/downloads/) 3.10 or newer. On Windows, tick **Add python.exe to PATH**.
+2. [Download DebugPilot](https://github.com/brianohjiho-web/debugpilot/archive/refs/heads/main.zip) and unzip it.
+3. Start it:
+   - **Windows:** double-click `start.bat`.
+   - **Mac:** open Terminal, type `bash ` (with a space), drag `start.command` into the window and press Enter.
+4. The first time takes a few minutes. Your browser opens. Keep the window open while you use it.
+5. To fix your own code, copy `.env.example` to `.env` and add your Claude API key.
+
+### What is in the download?
+
+You only need to touch **`start.bat`** (Windows) or **`start.command`** (Mac). The rest is the engine inside.
+
+| File or folder | What it is |
 |---|---|
-| `start.bat` | **Double-click this to start.** It sets everything up and opens your browser. |
+| `start.bat`, `start.command` | **Double-click or run to start.** Sets everything up and opens your browser. |
 | `share.bat` | Optional. Makes a link so a friend can open your copy. |
-| `.env.example` | A blank settings form. Copy it to `.env` and add your AI key to fix your own code. |
-| `requirements.txt` | A shopping list of tools the app needs. `start.bat` installs them for you. |
-| `server.py` | The app itself. It runs on your computer. |
+| `.env.example` | A blank settings form. Copy it to `.env` and add your AI key. |
+| `requirements.txt` | The tools the app needs. The start file installs them for you. |
+| `server.py` | The app itself. |
 | `agent/` | The "brain" that finds bugs and writes fixes. |
-| `runner/` | The safe box where code is tested, so it can't harm your computer. |
+| `runner/` | The safe box where code is tested. |
 | `web/` | The pages you see in your browser. |
 | `extension/` | The Chrome add-on. |
 | `watcher/` | A tiny script for watching your own website for crashes. |
-| `demo-site/`, `demo-booking/`, `demo-power/` | Practice websites with bugs on purpose, so you can try it. |
+| `demo-site/`, `demo-booking/`, `demo-power/` | Practice websites with bugs on purpose. |
 | `docs/` | The public website and example report. |
 | `tests/` | Checks that the app itself works. |
 | `Dockerfile.*`, `docker-compose.yml` | For people who use Docker. You can ignore these. |
 
-When you run it, it also makes a `data/` folder to save scan results. It is only on your computer.
+It also makes a `data/` folder to save scan results. It stays on your computer.
 
 ---
 
-## Add it to Chrome
+## Chrome add-on
 
-Scan any page you are on with one click. DebugPilot must be running on your computer.
+Scan any page you are on with one click. It uses the live app, so there is nothing to run on your computer.
 
-1. Open `chrome://extensions` in Chrome.
-2. Turn on **Developer mode** (top right).
-3. Click **Load unpacked** and pick the `extension` folder.
-4. On any site, click the DebugPilot button and choose **Scan this page**.
+1. [Download the extension](https://brianohjiho-web.github.io/debugpilot/debugpilot-extension.zip) and unzip it.
+2. Open `chrome://extensions` in Chrome.
+3. Turn on **Developer mode** (top right).
+4. Click **Load unpacked** and pick the unzipped folder.
+5. On any site, click the DebugPilot button (or right-click) and choose **Scan this page**.
+
+To use your own copy instead, open the add-on's **Settings** and enter `http://localhost:8000`.
 
 ---
 
 ## What it can do
 
 ### 1. Fix your code
-Paste a file. You can add the error message too.
 
-It works with **8 languages:** Python, JavaScript, SQL, C, C++, Java, Go and R.
+Paste a file. You can add the error message too. Works with **8 languages:** Python, JavaScript, SQL, C, C++, Java, Go and R.
 
-What happens:
 1. It loads your code to see if it even starts.
 2. It asks Claude (an AI) what is wrong and how to fix it.
 3. It runs a test on your **old** code. The test must **fail**. If it doesn't, the test is no good, so it tries again.
 4. It runs the same test on the **fixed** code. The test must **pass**.
-5. It shows a report: summary, cause, next steps, and the fix (what was removed and added).
+5. It shows a report: summary, cause, next steps, and the fix.
 6. If you want, it opens a **draft** pull request on GitHub. A person reviews it before it is merged.
 
 Every fix runs in a locked-down safe box (a "sandbox"). Nothing is called "verified" unless it passed there.
 
 ### 2. Scan any website
-No install needed on the website. Go to **Scan a site**, paste a link, press **Scan**.
+
+Go to **Scan a site**, paste a link, press **Scan**.
 
 1. **Visit.** A hidden browser clicks every button, leaves boxes empty, and types odd things.
 2. **Catch.** Each crash is saved with the steps that caused it.
 3. **Fix.** It reads the site's public code and writes a small fix.
 4. **Prove.** It repeats the steps twice: with the real code (must crash), then with the fixed code (must not crash). Only then it says **Fix proven**.
-5. **Speed check.** It loads the page like a phone on a slow 4G connection. You see how fast it starts, how big it is, and what is slow. For example: "this image is 1.5 MB, save it as WebP".
+5. **Speed check.** It loads the page like a phone on a slow 4G connection and shows what is slow. For example: "this image is 1.5 MB, save it as WebP".
 6. **Share.** Press **Copy report** to send it to the site's owner.
 
 ### 3. Scan equipment web pages (read-only)
+
 Turn on **Equipment mode** to check the web pages inside data center equipment, like a power backup (UPS) page at `192.168.1.50`.
 
 - It only opens pages and follows links. It **never** presses buttons or types.
@@ -141,18 +165,11 @@ Turn on **Equipment mode** to check the web pages inside data center equipment, 
 
 Only scan equipment you are allowed to test.
 
-### 4. Chrome extension
-Scan the page you are looking at with one click.
+### 4. Autopilot for your own website
 
-1. Open `chrome://extensions`.
-2. Turn on **Developer mode**.
-3. Click **Load unpacked** and pick the `extension` folder.
-4. On any site, click the DebugPilot button (or right-click) and choose **Scan this page**.
-
-### 5. Autopilot for your own website
 Add one line to your website:
 
-```html
+```
 <script src="https://your-debugpilot/watch.js" data-key="YOUR_KEY" defer></script>
 ```
 
@@ -171,9 +188,7 @@ It also notices when the problem is **not** the code (for example, a broken sens
 
 <p align="center"><img src="docs/how-it-fits.svg" width="800" alt="You, then the DebugPilot app, which asks Claude for a fix and tests it in the safe box, then a result"></p>
 
-In short: you ask in your browser, the app asks Claude for a fix, and the safe box checks that the fix really works.
-
-**Result:** you get a fix that was tested and a report. A person looks at it before anything changes.
+You ask in your browser, the app asks Claude for a fix, and the safe box checks that the fix really works. You get a tested fix and a report. A person looks at it before anything changes.
 
 ### Folders
 
@@ -200,4 +215,3 @@ In short: you ask in your browser, the app asks Claude for a fix, and the safe b
 | Java | A `TestMain` class that exits 1 on fail |
 | Go | Normal `go test` functions |
 | R | `test_...` functions using `stopifnot()` |
-
