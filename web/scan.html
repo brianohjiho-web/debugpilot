@@ -110,6 +110,8 @@ form{display:flex;justify-content:center;gap:10px}
 </svg>
   <h1 class="mark">Debug<span>Pilot</span></h1>
   <p class="tagline">Paste a website. Find every crash. Get a fix that's proven in the live page.</p>
+  <p id="slownote" style="display:none;background:#fff8e1;border:1px solid #f0d58a;color:#6b5200;padding:10px 14px;margin:10px auto;max-width:640px;border-radius:8px;font-size:14px;text-align:center">This live site is a little slower than the full version. For faster scans and every feature, download the files and run DebugPilot on your own computer.</p>
+  <script>fetch("/api/config").then(r=>r.json()).then(c=>{if(c.public)document.getElementById("slownote").style.display="block"}).catch(()=>{})</script>
   <form id="scanForm">
     <div class="search">
       <div class="cell"><b>Checks</b><span>Crashes + Speed</span></div>
