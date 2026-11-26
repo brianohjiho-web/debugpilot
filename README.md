@@ -157,6 +157,8 @@ It also notices when the problem is **not** the code (for example, a broken sens
 
 ### How the pieces fit
 
+<p align="center"><img src="docs/how-it-fits.svg" width="800" alt="You, then the DebugPilot app, which asks Claude for a fix and tests it in the safe box, then a result"></p>
+
 In short: you ask in your browser, the app asks Claude for a fix, and the safe box checks that the fix really works.
 
 **Result:** you get a fix that was tested and a report. A person looks at it before anything changes.
