@@ -4,7 +4,7 @@
 
 # DebugPilot
 
-**DebugPilot finds mistakes (bugs) in code and websites, fixes them, and checks that the fix really works.**
+**DebugPilot finds mistakes (bugs) and crashes in code and websites, shows exactly how to make them happen again, fixes them, and checks that the fix really works.**
 
 Think of it like a spell checker, but for programs. A person always checks the fix before anything changes.
 
