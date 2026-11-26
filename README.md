@@ -19,6 +19,18 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 ---
 
+## Which version should I use?
+
+| Version | What you get |
+|---|---|
+| **Download and run it** (full tool) | Everything: scan websites, fix your own pasted code in 8 languages, equipment pages, autopilot, and the Chrome add-on. See [Try it on Windows](https://brianohjiho-web.github.io/debugpilot/#try-it). |
+| **Live app** (nothing to install) | Scan a website, plus a built-in Debug code example. Pasting your own code is switched off for safety. |
+| **Codespaces button** (no download) | The real tool in your browser. Needs a free GitHub account. |
+| **Example report** | A saved result to look at. |
+
+**To get everything, download and run DebugPilot on your own computer.** The online version is limited for safety.
+
+---
 ## How it works
 
 | | Step |
