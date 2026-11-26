@@ -121,6 +121,31 @@ def config():
     }
 
 
+_EXAMPLE_CACHE: dict = {}
+
+
+def _example_result(language: str, source: str, error: str) -> dict:
+    """The built-in examples never change, so run each once and reuse the answer."""
+    key = (language, source.strip())
+    if key not in _EXAMPLE_CACHE:
+        _EXAMPLE_CACHE[key] = DebugAgent(runner=run_code, llm=None).debug(language, source, error).to_dict()
+    return _EXAMPLE_CACHE[key]
+
+
+def _warm_examples():
+    for lang, e in EXAMPLES.items():
+        try:
+            _example_result(lang, e["source"], e["error"])
+        except Exception:
+            pass
+
+
+@app.on_event("startup")
+def _warm_on_start():
+    if PUBLIC:
+        threading.Thread(target=_warm_examples, daemon=True).start()
+
+
 @app.post("/api/debug")
 def debug(req: DebugRequest, request: Request):
     if PUBLIC and not _unlocked(request):
@@ -128,7 +153,7 @@ def debug(req: DebugRequest, request: Request):
         if not any(req.source.strip() == e["source"].strip() for e in EXAMPLES.values()):
             return {"language": req.language, "mode": "demo", "steps": [], "answer": None, "attempts": 0,
                     "error": "This is a preview. On the public website you can try the built-in example (press Load example, then Debug). Pasting your own code is switched off."}
-        return DebugAgent(runner=run_code, llm=None).debug(req.language, req.source, req.error).to_dict()
+        return _example_result(req.language, req.source, req.error)
     agent = DebugAgent(runner=run_code, llm=make_llm())
     return agent.debug(req.language, req.source, req.error).to_dict()
 
