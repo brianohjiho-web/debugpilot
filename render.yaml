@@ -10,3 +10,5 @@ services:
         value: "7860"
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: DEBUGPILOT_UNLOCK_CODE
+        sync: false

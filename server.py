@@ -65,14 +65,31 @@ PUBLIC = os.environ.get("DEBUGPILOT_PUBLIC") == "1"
 _PUBLIC_BLOCKED = ("/api/debug", "/api/pr", "/api/ingest", "/api/projects", "/api/issues", "/api/demo/reset")
 
 
+UNLOCK_CODE = os.environ.get("DEBUGPILOT_UNLOCK_CODE", "")
+
+
+def _unlocked(request) -> bool:
+    import hmac
+    return bool(UNLOCK_CODE) and hmac.compare_digest(request.cookies.get("dp_unlock", ""), UNLOCK_CODE)
+
+
 @app.middleware("http")
 async def public_mode(request, call_next):
     if PUBLIC:
         p = request.url.path
-        if p == "/":
-            return RedirectResponse("/scan")
-        if p.startswith(_PUBLIC_BLOCKED):
-            return JSONResponse({"detail": "This is switched off on the public website."}, status_code=403)
+        if p == "/unlock":
+            import hmac
+            ok = bool(UNLOCK_CODE) and hmac.compare_digest(request.query_params.get("code", ""), UNLOCK_CODE)
+            if not ok:
+                return JSONResponse({"detail": "Wrong code."}, status_code=403)
+            resp = RedirectResponse("/")
+            resp.set_cookie("dp_unlock", UNLOCK_CODE, max_age=30 * 86400, httponly=True, secure=True, samesite="lax")
+            return resp
+        if not _unlocked(request):
+            if p == "/":
+                return RedirectResponse("/scan")
+            if p.startswith(_PUBLIC_BLOCKED):
+                return JSONResponse({"detail": "This is switched off on the public website."}, status_code=403)
     return await call_next(request)
 
 
