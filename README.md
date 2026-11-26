@@ -189,12 +189,3 @@ In short: you ask in your browser, the app asks Claude for a fix, and the safe b
 | Go | Normal `go test` functions |
 | R | `test_...` functions using `stopifnot()` |
 
-### Why the runner is a separate container
-The code being fixed is not trusted. The runner has:
-- no internet
-- a read-only filesystem
-- a 1 GB memory limit
-- a process limit
-- no extra Linux powers
-- a non-root user
-- a time limit, a CPU limit, and a throwaway folder for each run
