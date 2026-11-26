@@ -18,9 +18,13 @@
 
 ## Use the full version
 
-**To use the full version, you need to download all the files** and run them on your own computer. The live app online only does part of the job.
-
-**Tip:** scans run **faster when you download the files** and run them on your own computer. The live app uses a small free server, so it can be slow and takes about a minute to wake up the first time.
+> [!IMPORTANT]
+> **To use the full version, download all the files** and run them on your own computer.
+> The live app online only does part of the job.
+>
+> **Downloading is also faster.** The live app runs on a small free server, so it is slow and takes about a minute to wake up the first time.
+>
+> **[Download for Windows or Mac](https://github.com/brianohjiho-web/debugpilot/archive/refs/heads/main.zip)**
 
 ---
 ## How it works
