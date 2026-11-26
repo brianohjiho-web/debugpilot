@@ -23,4 +23,5 @@ jobs:
           git config user.name "deploy"
           git add -A
           git commit -q -m "Deploy"
+          HF_TOKEN=$(printf %s "$HF_TOKEN" | tr -d '[:space:]')
           git push -f "https://user:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" main
