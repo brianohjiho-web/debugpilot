@@ -16,9 +16,9 @@
 
 ---
 
-## Use the whole tool
+## Use the full version
 
-**To use the whole tool, you need to download all the files** and run them on your own computer. The live app online only does part of the job.
+**To use the full version, you need to download all the files** and run them on your own computer. The live app online only does part of the job.
 
 **Tip:** scans run **faster when you download the files** and run them on your own computer. The live app uses a small free server, so it can be slow and takes about a minute to wake up the first time.
 
