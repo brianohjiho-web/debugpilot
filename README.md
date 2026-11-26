@@ -26,11 +26,10 @@ A person always checks a fix before anything changes.
 
 1. [How it works](#how-it-works)
 2. [What it looks like](#what-it-looks-like)
-3. [Live app vs full version](#live-app-vs-full-version)
-4. [Install the full version](#install-the-full-version)
-5. [Chrome add-on](#chrome-add-on)
-6. [What it can do](#what-it-can-do)
-7. [For developers](#for-developers)
+3. [Install the full version](#install-the-full-version)
+4. [Chrome add-on](#chrome-add-on)
+5. [What it can do](#what-it-can-do)
+6. [For developers](#for-developers)
 
 ---
 
@@ -62,22 +61,6 @@ A person always checks a fix before anything changes.
 
 ---
 
-## Live app vs full version
-
-| | Live app | Full version (download) |
-|---|---|---|
-| Install needed | None | Yes, about 5 minutes |
-| Scan a website | Yes (about 10 scans an hour) | Yes, faster, no limit |
-| Fix your own pasted code | No, built-in example only | Yes, 8 languages |
-| Equipment pages and autopilot | No | Yes |
-| Speed | Slow, sleeps when idle | Fast |
-
-**How to use the live app:** open it, type a full address like `https://example.com`, press scan and wait about a minute. The report shows each crash, why it happened and a fix.
-
-Only scan websites you are allowed to test.
-
----
-
 ## Install the full version
 
 1. Install [Python](https://www.python.org/downloads/) 3.10 or newer. On Windows, tick **Add python.exe to PATH**.
@@ -85,7 +68,8 @@ Only scan websites you are allowed to test.
 3. Start it:
    - **Windows:** double-click `start.bat`.
    - **Mac:** open Terminal, type `bash ` (with a space), drag `start.command` into the window and press Enter.
-4. The first time takes a few minutes. Your browser opens. Keep the window open while you use it.
+4. The first time takes a few minutes. Your browser opens. Keep the window open while you use it.
+
 
 ### What is in the download?
 
