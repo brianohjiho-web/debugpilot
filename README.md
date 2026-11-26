@@ -15,7 +15,6 @@ Think of it like a spell checker, but for programs. A person always checks the f
 | **Use the tool now** (free, nothing to install) | [Open the live app](https://debugpilot-x4kn.onrender.com/scan) |
 | **See an example result** (nothing to install) | [Example report](https://brianohjiho-web.github.io/debugpilot/report/) |
 | **Scan any page with one click** | [Chrome add-on](#add-it-to-chrome) |
-| **Read the overview** | [Website](https://brianohjiho-web.github.io/debugpilot/) |
 
 ---
 
