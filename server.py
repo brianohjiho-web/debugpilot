@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -86,9 +86,7 @@ async def public_mode(request, call_next):
             resp.set_cookie("dp_unlock", UNLOCK_CODE, max_age=30 * 86400, httponly=True, secure=True, samesite="lax")
             return resp
         if not _unlocked(request):
-            if p == "/":
-                return RedirectResponse("/scan")
-            if p.startswith(_PUBLIC_BLOCKED):
+            if p.startswith(_PUBLIC_BLOCKED) and p != "/api/debug":
                 return JSONResponse({"detail": "This is switched off on the public website."}, status_code=403)
     return await call_next(request)
 
@@ -115,7 +113,7 @@ def index():
 def config():
     return {
         "languages": {k: LABELS[k] for k in TEST_RULES},
-        "claude": bool(os.environ.get("ANTHROPIC_API_KEY")),
+        "claude": bool(os.environ.get("ANTHROPIC_API_KEY")),`n        "public": PUBLIC,
         "github": bool(os.environ.get("GITHUB_TOKEN")),
         "sandbox": "container" if RUNNER_URL else "this machine",
         "examples": {k: {"source": v["source"], "error": v["error"]} for k, v in EXAMPLES.items()},
@@ -123,7 +121,13 @@ def config():
 
 
 @app.post("/api/debug")
-def debug(req: DebugRequest):
+def debug(req: DebugRequest, request: Request):
+    if PUBLIC and not _unlocked(request):
+        # Visitors can only try the built-in examples (no AI, no running their own code).
+        if not any(req.source.strip() == e["source"].strip() for e in EXAMPLES.values()):
+            return {"language": req.language, "mode": "demo", "steps": [], "answer": None, "attempts": 0,
+                    "error": "This is a preview. On the public website you can try the built-in example (press Load example, then Debug). Pasting your own code is switched off."}
+        return DebugAgent(runner=run_code, llm=None).debug(req.language, req.source, req.error).to_dict()
     agent = DebugAgent(runner=run_code, llm=make_llm())
     return agent.debug(req.language, req.source, req.error).to_dict()
 
