@@ -1,5 +1,5 @@
 // Shared by the popup and the right-click menu: talk to the DebugPilot server.
-const DEFAULT_SERVER = "http://localhost:8000";
+const DEFAULT_SERVER = "https://debugpilot-x4kn.onrender.com";
 
 async function getServer() {
   const { server } = await chrome.storage.sync.get({ server: DEFAULT_SERVER });
@@ -21,7 +21,7 @@ async function startScan(url) {
       body: JSON.stringify({ url }),
     });
   } catch (e) {
-    throw new Error("Can't reach DebugPilot at " + server + ". Start it first (double-click start in the DebugPilot folder).");
+    throw new Error("Can't reach DebugPilot at " + server + ". Check your internet and try again (the free server may take a minute to wake up).");
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.detail || "The scan couldn't start (error " + res.status + ").");

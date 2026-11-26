@@ -39,7 +39,7 @@ $("scan").onclick = async () => {
 };
 
 $("save").onclick = async () => {
-  const value = $("server").value.trim().replace(/\/+$/, "") || "http://localhost:8000";
+  const value = $("server").value.trim().replace(/\/+$/, "") || "https://debugpilot-x4kn.onrender.com";
   if (!/^https?:\/\//.test(value)) { say("The address should start with http:// or https://", "err"); return; }
   // A DebugPilot that runs online needs permission to talk to it.
   if (!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(value)) {
