@@ -28,6 +28,8 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 **To get everything, download and run DebugPilot on your own computer.** The online version is limited for safety.
 
+**Tip:** scans run **faster when you download the files** and run them on your own computer. The live app uses a small free server, so it can be slow and takes about a minute to wake up the first time.
+
 ---
 ## How it works
 
