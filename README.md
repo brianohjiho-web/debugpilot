@@ -22,17 +22,6 @@ A person always checks a fix before anything changes.
 
 ---
 
-## Contents
-
-1. [How it works](#how-it-works)
-2. [What it looks like](#what-it-looks-like)
-3. [Install the full version](#install-the-full-version)
-4. [Chrome add-on](#chrome-add-on)
-5. [What it can do](#what-it-can-do)
-6. [For developers](#for-developers)
-
----
-
 ## How it works
 
 | | Step |
