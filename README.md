@@ -16,15 +16,9 @@
 
 ---
 
-## Which version should I use?
+## Use the whole tool
 
-| Version | What you get |
-|---|---|
-| **Download and run it** (full tool) | Everything: scan websites, fix your own pasted code in 8 languages, equipment pages, autopilot, and the Chrome add-on. See [Try it on Windows or Mac](https://brianohjiho-web.github.io/debugpilot/#try-it). |
-| **Live app** (nothing to install) | Scan a website, plus a built-in Debug code example. Pasting your own code is switched off for safety. |
-| **Example report** | A saved result to look at. |
-
-**To get everything, download and run DebugPilot on your own computer.** The online version is limited for safety.
+**To use the whole tool, you need to download all the files** and run them on your own computer. The live app online only does part of the job.
 
 **Tip:** scans run **faster when you download the files** and run them on your own computer. The live app uses a small free server, so it can be slow and takes about a minute to wake up the first time.
 
