@@ -113,7 +113,8 @@ def index():
 def config():
     return {
         "languages": {k: LABELS[k] for k in TEST_RULES},
-        "claude": bool(os.environ.get("ANTHROPIC_API_KEY")),`n        "public": PUBLIC,
+        "claude": bool(os.environ.get("ANTHROPIC_API_KEY")),
+        "public": PUBLIC,
         "github": bool(os.environ.get("GITHUB_TOKEN")),
         "sandbox": "container" if RUNNER_URL else "this machine",
         "examples": {k: {"source": v["source"], "error": v["error"]} for k, v in EXAMPLES.items()},
