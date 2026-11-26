@@ -8,6 +8,7 @@
 
 Think of it like a spell checker, but for programs. A person always checks the fix before anything changes.
 
+**Live app (free, nothing to install):** [debugpilot-x4kn.onrender.com](https://debugpilot-x4kn.onrender.com/scan)  
 **Website:** [brianohjiho-web.github.io/debugpilot](https://brianohjiho-web.github.io/debugpilot/)  
 **Example report (opens in any browser, nothing to install):** [see it here](https://brianohjiho-web.github.io/debugpilot/report/)
 **Chrome add-on:** scan any page you are on with one click. [See how to add it](#add-it-to-chrome).
