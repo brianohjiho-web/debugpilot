@@ -27,6 +27,19 @@ Think of it like a spell checker, but for programs. A person always checks the f
 
 ---
 
+## How to use it (the live app)
+
+1. **Scan a website.** Open the [live app](https://debugpilot-x4kn.onrender.com/scan), type a full address like `https://example.com`, press scan and wait about a minute. The report shows each crash, why it happened and a fix.
+2. **Try Debug code.** Open [Debug code](https://debugpilot-x4kn.onrender.com/), press **Load example**, then **Debug**. You see a test that fails, then a fix that passes.
+3. **Use it on any page.** Add the Chrome extension (see below), then click it on any site.
+
+**Good to know**
+- The free server sleeps when nobody uses it, so the first visit can take a minute.
+- Each visitor can run about 10 scans an hour.
+- On the public site, Debug code only runs the built-in example. Pasting your own code is switched off for safety. To fix your own code, run DebugPilot on your computer with `start.bat`.
+- Only scan websites you are allowed to test. A person should always read a fix before using it.
+
+---
 ## What it looks like
 
 **Scan a website.** Type a web address and press the search button.
