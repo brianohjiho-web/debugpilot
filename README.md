@@ -20,7 +20,7 @@ A person always checks a fix before anything changes.
 >
 > **Downloading is also faster.** The live app runs on a small free server, so it is slow and takes about a minute to wake up the first time.
 >
-> **To use Debug code, add your Claude API key.** Open the file `.env` (copy `.env.example` and rename the copy to `.env`) and paste your key there. Without a key, scans still work.
+> **To use Debug code, add your Claude API key.** In the downloaded folder, find the file `.env.example` and make a copy of it. Rename the copy to `.env`. Open it in Notepad, paste your key after `ANTHROPIC_API_KEY=`, and save. Without a key, scans still work.
 
 ---
 
