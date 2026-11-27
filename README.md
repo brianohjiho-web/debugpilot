@@ -58,6 +58,7 @@ A person always checks a fix before anything changes.
    - **Windows:** double-click `start.bat`.
    - **Mac:** open Terminal, type `bash ` (with a space), drag `start.command` into the window and press Enter.
 4. The first time takes a few minutes. Your browser opens. Keep the window open while you use it.
+5. **Optional: turn on AI fixes.** To have Claude fix your own code, get a Claude API key at [console.anthropic.com](https://console.anthropic.com), copy `.env.example` to `.env`, and paste your key in. Without a key, DebugPilot still scans websites and runs the built-in example.
 
 
 ### What is in the download?
