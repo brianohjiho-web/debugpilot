@@ -20,7 +20,7 @@ A person always checks a fix before anything changes.
 >
 > **Downloading is also faster.** The live app runs on a small free server, so it is slow and takes about a minute to wake up the first time.
 >
-> **For AI fixes, add your own Claude API key.** The download works without one (scans and the built-in example), but to have Claude fix your own code, add your key to `.env`. See step 5 under [Install the full version](#install-the-full-version).
+> **To let Claude fix your own code, add your Claude API key.** Open the file `.env` (copy `.env.example` and rename the copy to `.env`) and paste your key there. Without a key, scans still work.
 
 ---
 
